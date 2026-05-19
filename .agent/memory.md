@@ -130,3 +130,18 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - User clarified that real baseline training/evaluation should run the full split, not stop after a small debug limit.
 - Updated CLI/trainer/notebook so `limit=None` runs the full selected split.
 - `--limit` / `limit=5` should be used only for smoke tests.
+
+## Base RAG Full Validation Result On 2026-05-19
+
+User ran the self-contained Kaggle baseline on full Qasper validation.
+
+- Examples: `1005`
+- `avg_token_f1`: `0.13836707101945536`
+- `avg_answer_string_recall_at_5`: `0.22354892205638474`
+- `avg_context_precision`: `0.7122388059701488`
+- `avg_context_recall`: `0.8378653914553359`
+- `avg_faithfulness`: `0.9862354892205638`
+- `avg_answer_relevancy`: `0.09799809183209088`
+- Predictions path on Kaggle: `outputs/base_rag_qasper_predictions.jsonl`
+
+Interpretation: baseline dense retrieval retrieves useful context reasonably well, but the small generator/prompt produces weak answer overlap and low answer relevancy. This supports continuing with long-context/RAG improvements, especially reranking, context packing/reordering, better generation prompting, and later advanced indexing.
