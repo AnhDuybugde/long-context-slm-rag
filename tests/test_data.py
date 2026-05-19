@@ -1,6 +1,6 @@
 import unittest
 
-from src.qasper_base_rag.data import build_document_chunks, extract_qa_examples
+from src.qasper_base_rag.data import build_document_chunks, extract_qa_examples, iter_answer_records
 
 
 class DataTest(unittest.TestCase):
@@ -30,6 +30,48 @@ class DataTest(unittest.TestCase):
         self.assertEqual(examples[0].gold_answers, ["A baseline RAG model."])
         self.assertEqual(examples[0].evidence, ["The paper uses a baseline RAG model."])
 
+    def test_extract_qa_examples_reads_parquet_answer_columns(self):
+        record = {
+            "id": "doc-1",
+            "title": "A Paper",
+            "qas": {
+                "question": ["What is used?"],
+                "question_id": ["q1"],
+                "answers": [
+                    {
+                        "answer": [
+                            {
+                                "free_form_answer": "A dense retriever.",
+                                "evidence": ["The system uses a dense retriever."],
+                                "unanswerable": False,
+                                "extractive_spans": [],
+                                "yes_no": None,
+                            }
+                        ],
+                        "annotation_id": ["a1"],
+                        "worker_id": ["w1"],
+                    }
+                ],
+            },
+        }
+
+        examples = extract_qa_examples(record)
+
+        self.assertEqual(examples[0].gold_answers, ["A dense retriever."])
+        self.assertEqual(examples[0].evidence, ["The system uses a dense retriever."])
+
+    def test_iter_answer_records_handles_parquet_column_format(self):
+        records = iter_answer_records(
+            {
+                "answer": [{"free_form_answer": "answer one"}],
+                "annotation_id": ["a1"],
+                "worker_id": ["w1"],
+            }
+        )
+
+        self.assertEqual(records[0]["answer"]["free_form_answer"], "answer one")
+        self.assertEqual(records[0]["annotation_id"], "a1")
+
     def test_build_document_chunks_includes_abstract_and_sections(self):
         record = {
             "id": "doc-1",
@@ -49,4 +91,3 @@ class DataTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

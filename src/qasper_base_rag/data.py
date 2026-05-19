@@ -59,6 +59,38 @@ def _normalise_evidence(answer: dict[str, Any]) -> list[str]:
     return [str(item).strip() for item in evidence if str(item).strip()]
 
 
+def iter_answer_records(answers: Any) -> list[dict[str, Any]]:
+    """Return answer records from Qasper's possible nested formats.
+
+    The original HF script exposes answers as a list of records. The Parquet
+    export can expose one question's answers as a dict of columns:
+    `{"answer": [...], "annotation_id": [...], "worker_id": [...]}`.
+    """
+    if isinstance(answers, list):
+        return [answer for answer in answers if isinstance(answer, dict)]
+    if not isinstance(answers, dict):
+        return []
+
+    answer_values = answers.get("answer", [])
+    annotation_ids = answers.get("annotation_id", [])
+    worker_ids = answers.get("worker_id", [])
+
+    if isinstance(answer_values, dict):
+        answer_values = [answer_values]
+    if not isinstance(answer_values, list):
+        return []
+
+    records = []
+    for index, answer_value in enumerate(answer_values):
+        record = {"answer": answer_value}
+        if isinstance(annotation_ids, list) and index < len(annotation_ids):
+            record["annotation_id"] = annotation_ids[index]
+        if isinstance(worker_ids, list) and index < len(worker_ids):
+            record["worker_id"] = worker_ids[index]
+        records.append(record)
+    return records
+
+
 def extract_qa_examples(record: dict[str, Any]) -> list[QAExample]:
     qas = record.get("qas", {})
     questions = qas.get("question", [])
@@ -69,7 +101,7 @@ def extract_qa_examples(record: dict[str, Any]) -> list[QAExample]:
     for question, question_id, answers in zip(questions, question_ids, answers_list):
         gold_answers = []
         evidence = []
-        for answer in answers:
+        for answer in iter_answer_records(answers):
             normalised = _normalise_answer(answer)
             if normalised:
                 gold_answers.append(normalised)

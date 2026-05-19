@@ -3,6 +3,6 @@ __pycache__/
 .ipynb_checkpoints/
 .env
 outputs/
+notebooks/output/
 data/
 models/
-

@@ -98,3 +98,11 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - First attempted fix was to pin `datasets>=2.19.0,<4.0.0` and use `trust_remote_code=True`, but Kaggle still reported that `trust_remote_code` is no longer supported.
 - Stable fix: load the standard Qasper Parquet exports directly via `load_dataset("parquet", data_files=...)`.
 - The HF token warning is not the root error; it only warns about unauthenticated rate limits.
+
+## Qasper Kaggle Output Read On 2026-05-19
+
+- User-provided notebook output confirmed Parquet loading works.
+- Loaded splits: train `888`, validation `281`, test `416`.
+- Dataset features: `id`, `title`, `abstract`, `full_text`, `qas`, `figures_and_tables`.
+- Validation sample `1912.01214` has title `Cross-lingual Pre-training Based Transfer for Zero-shot Neural Machine Translation`, 4 QA pairs, and 17 full-text sections.
+- Important schema finding: for Parquet records, `qas["answers"][i]` is a dict of columns (`answer`, `annotation_id`, `worker_id`), not a plain list of answer records. `data.py` and notebook helpers must normalize this format before iterating answers.
