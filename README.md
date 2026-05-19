@@ -38,4 +38,23 @@ The evaluator exports per-example JSONL records and prints the four main RAG com
 
 For the base version these are offline heuristic metrics, not LLM-as-judge metrics. They are designed to make the baseline comparable before adding RAGAS or another judge-based evaluator.
 
+## Base RAG Training/Evaluation
+
+In this baseline, "training" means building the per-document RAG index and running
+the SLM generation/evaluation loop. No model weights are fine-tuned yet.
+
+```bash
+python -m src.qasper_base_rag.evaluate \
+  --split validation \
+  --limit 20 \
+  --top-k 5 \
+  --output-predictions outputs/base_rag_qasper_predictions.jsonl \
+  --output-summary outputs/base_rag_qasper_summary.json
+```
+
+Artifacts:
+
+- `outputs/base_rag_qasper_predictions.jsonl`: one row per QA example.
+- `outputs/base_rag_qasper_summary.json`: config and aggregate metrics.
+
 For Colab or Kaggle, open the notebook in `notebooks/` and run the cells there.

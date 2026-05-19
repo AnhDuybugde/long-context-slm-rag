@@ -108,3 +108,12 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - Important schema finding: for Parquet records, `qas["answers"][i]` is a dict of columns (`answer`, `annotation_id`, `worker_id`), not a plain list of answer records. `data.py` and notebook helpers must normalize this format before iterating answers.
 - Updated Kaggle output confirmed answer normalization works: `show_qa()` now prints full answer records, including `extractive_spans`, `free_form_answer`, `evidence`, `highlighted_evidence`, `annotation_id`, and `worker_id`.
 - Next implementation step can move from dataset exploration to the baseline RAG runner/evaluator.
+
+## Base RAG Training Code On 2026-05-19
+
+- Added OOP `BaseRAGTrainer` in `src/qasper_base_rag/trainer.py`.
+- Baseline training means building per-document RAG indexes and running SLM generation/evaluation; no model weight fine-tuning yet.
+- `evaluate.py` now acts as a CLI wrapper around `BaseRAGTrainer`.
+- Trainer writes both JSONL predictions and JSON summary artifacts.
+- Added trainer unit test with a fake pipeline so tests do not download models.
+- Updated notebook with an optional Base RAG Training Runner section that calls the `.py` CLI after repo code is available in Kaggle/Colab.

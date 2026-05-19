@@ -31,6 +31,7 @@ Qasper is a good first benchmark because it focuses on question answering over s
   - token-level F1 against gold answers
   - weak answer-string recall in retrieved contexts
 - JSONL prediction export for later analysis.
+- Summary JSON export with config and aggregate metrics.
 - Colab/Kaggle notebook launcher in `notebooks/`.
 
 ## Not Included Yet
@@ -69,3 +70,10 @@ These are intentionally excluded from the baseline and should be added one by on
 5. Only after the `.py` workflow is stable, summarize the working code into `.ipynb` for Colab/Kaggle.
 
 The notebook should be an experiment runner, not the primary source of truth.
+
+## Base Training Meaning
+
+The baseline does not fine-tune model weights. "Training" means fitting the RAG
+runtime for an experiment: chunking each Qasper paper, embedding chunks, building
+the per-document dense index, generating answers with the selected SLM, and
+writing comparable evaluation artifacts.
