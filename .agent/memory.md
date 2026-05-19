@@ -85,3 +85,9 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - Created branch `main`.
 - Added remote `origin`: `https://github.com/AnhDuybugde/long-context-slm-rag.git`
 - Pushed initial baseline commit `85be98b` to `origin/main`.
+
+## Notebook Update On 2026-05-19
+
+- User could not import the GitHub repo into Kaggle and only needed the Qasper dataset loading step.
+- Rewrote `notebooks/qasper_base_rag_colab.ipynb` as a standalone Kaggle/Colab notebook.
+- The notebook now uses only `from datasets import load_dataset` and `load_dataset("allenai/qasper")`, inspects splits/schema/sample QA pairs, wraps a sample record in a small OOP helper, and exports a validation preview JSONL.
