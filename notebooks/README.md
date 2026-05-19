@@ -11,3 +11,14 @@ Current notebook flow:
 5. Optionally run the self-contained base RAG training/evaluation runner.
 
 The Kaggle notebook is self-contained because importing local repo modules can be awkward there. The `.py` modules remain the source of truth for tests and maintainability.
+
+## Improved Notebook
+
+`qasper_improved_rag_colab.ipynb` is a separate self-contained notebook with the first improvement package:
+
+- Dense retrieval + BM25 sparse retrieval.
+- Reciprocal Rank Fusion.
+- U-shaped context reordering.
+- A stricter evidence-focused generation prompt.
+
+Run it after the baseline notebook and compare `outputs/improved_rag_qasper_summary.json` with `outputs/base_rag_qasper_summary.json`.

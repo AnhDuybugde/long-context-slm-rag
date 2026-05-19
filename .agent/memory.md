@@ -145,3 +145,10 @@ User ran the self-contained Kaggle baseline on full Qasper validation.
 - Predictions path on Kaggle: `outputs/base_rag_qasper_predictions.jsonl`
 
 Interpretation: baseline dense retrieval retrieves useful context reasonably well, but the small generator/prompt produces weak answer overlap and low answer relevancy. This supports continuing with long-context/RAG improvements, especially reranking, context packing/reordering, better generation prompting, and later advanced indexing.
+
+## First Improved RAG Variant On 2026-05-19
+
+- Added `src/qasper_base_rag/improved.py` with BM25 sparse retrieval, RRF fusion, U-shaped context reordering, and stricter evidence-focused generation prompt.
+- Added tests for tokenization, BM25 keyword matching, RRF, and U-shaped reordering.
+- Added `notebooks/qasper_improved_rag_colab.ipynb`, a self-contained Kaggle notebook for the improved variant.
+- This variant should be compared to the baseline full validation metrics before adding heavier methods like cross-encoder reranking or RAPTOR.

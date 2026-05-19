@@ -80,3 +80,15 @@ writing comparable evaluation artifacts.
 
 By default the CLI should run the full selected split. Use `--limit` only for
 debug/smoke tests.
+
+## First Improved Variant
+
+The first non-baseline variant is intentionally still simple and comparable:
+
+- Hybrid retrieval: dense retrieval plus BM25.
+- RRF fusion to merge dense and sparse rankings.
+- U-shaped context reordering to reduce lost-in-the-middle risk.
+- A stricter evidence-focused prompt for the same small generator.
+
+This variant should be compared against the base metrics before adding heavier
+methods such as cross-encoder reranking or RAPTOR.
