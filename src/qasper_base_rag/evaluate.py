@@ -9,7 +9,12 @@ from .trainer import BaseRAGConfig, BaseRAGTrainer
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate the base Qasper RAG pipeline.")
     parser.add_argument("--split", default="validation", choices=["train", "validation", "test"])
-    parser.add_argument("--limit", type=int, default=20, help="Number of QA examples to evaluate.")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Number of QA examples to evaluate. Omit to run the full split.",
+    )
     parser.add_argument("--top-k", type=int, default=5)
     parser.add_argument("--chunk-size", type=int, default=180)
     parser.add_argument("--overlap", type=int, default=40)

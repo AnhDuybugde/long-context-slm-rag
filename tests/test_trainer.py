@@ -76,7 +76,48 @@ class BaseRAGTrainerTest(unittest.TestCase):
             self.assertEqual(prediction_row["prediction"], "A dense retriever.")
             self.assertEqual(prediction_row["contexts"][0]["chunk_id"], "doc-1::0")
 
+    def test_none_limit_runs_all_examples(self):
+        records = []
+        for index in range(2):
+            records.append(
+                {
+                    "id": f"doc-{index}",
+                    "title": "A Paper",
+                    "abstract": "The system uses a dense retriever.",
+                    "full_text": {"section_name": [], "paragraphs": []},
+                    "qas": {
+                        "question": ["What does the system use?"],
+                        "question_id": [f"q{index}"],
+                        "answers": [
+                            {
+                                "answer": [
+                                    {
+                                        "free_form_answer": "A dense retriever.",
+                                        "evidence": ["The system uses a dense retriever."],
+                                        "unanswerable": False,
+                                        "extractive_spans": [],
+                                        "yes_no": None,
+                                    }
+                                ],
+                                "annotation_id": ["a1"],
+                                "worker_id": ["w1"],
+                            }
+                        ],
+                    },
+                }
+            )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = BaseRAGConfig(
+                limit=None,
+                output_predictions=str(Path(tmpdir) / "predictions.jsonl"),
+                output_summary=str(Path(tmpdir) / "summary.json"),
+            )
+
+            result = BaseRAGTrainer(config, pipeline=FakePipeline()).run(records)
+
+            self.assertEqual(result["metrics"]["examples"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()
-

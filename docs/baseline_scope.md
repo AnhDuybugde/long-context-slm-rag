@@ -52,7 +52,7 @@ These are intentionally excluded from the baseline and should be added one by on
 
 ## Suggested Experiment Order
 
-1. Run baseline and save metrics.
+1. Run the full baseline split and save metrics.
 2. Replace fixed chunking with semantic chunking.
 3. Add BM25 and compare sparse vs dense vs hybrid.
 4. Add cross-encoder reranking.
@@ -77,3 +77,6 @@ The baseline does not fine-tune model weights. "Training" means fitting the RAG
 runtime for an experiment: chunking each Qasper paper, embedding chunks, building
 the per-document dense index, generating answers with the selected SLM, and
 writing comparable evaluation artifacts.
+
+By default the CLI should run the full selected split. Use `--limit` only for
+debug/smoke tests.

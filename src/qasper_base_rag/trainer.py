@@ -31,7 +31,7 @@ class RAGPipeline(Protocol):
 @dataclass(frozen=True)
 class BaseRAGConfig:
     split: str = "validation"
-    limit: int = 20
+    limit: int | None = None
     top_k: int = 5
     chunk_size: int = 180
     overlap: int = 40
@@ -132,7 +132,7 @@ class BaseRAGTrainer:
                     result = self.evaluate_example(example)
                     metrics.add(result)
                     file.write(json.dumps(asdict(result), ensure_ascii=False) + "\n")
-                    if metrics.count >= self.config.limit:
+                    if self.config.limit is not None and metrics.count >= self.config.limit:
                         return self._write_summary(metrics, summary_path, predictions_path)
 
         return self._write_summary(metrics, summary_path, predictions_path)
@@ -190,4 +190,3 @@ class BaseRAGTrainer:
             }
             for chunk, score in zip(contexts, scores)
         ]
-

@@ -124,3 +124,9 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - Updated `notebooks/qasper_base_rag_colab.ipynb` to include a self-contained baseline RAG runner instead of requiring `src/qasper_base_rag` imports.
 - The notebook now defines local OOP/data classes for chunks, QA examples, dense retriever, small generator, and base pipeline.
 - The `.py` files remain the source of truth and are tested; the notebook is a Kaggle-friendly runnable copy.
+
+## Full Baseline Run Policy On 2026-05-19
+
+- User clarified that real baseline training/evaluation should run the full split, not stop after a small debug limit.
+- Updated CLI/trainer/notebook so `limit=None` runs the full selected split.
+- `--limit` / `limit=5` should be used only for smoke tests.

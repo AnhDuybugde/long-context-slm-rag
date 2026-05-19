@@ -22,7 +22,7 @@ This baseline intentionally does not include advanced methods yet. It is the ref
 
 ```bash
 pip install -r requirements.txt
-python -m src.qasper_base_rag.evaluate --split validation --limit 20
+python -m src.qasper_base_rag.evaluate --split validation
 ```
 
 Qasper's old Hugging Face loader uses a dataset script (`qasper.py`), which is
@@ -46,10 +46,15 @@ the SLM generation/evaluation loop. No model weights are fine-tuned yet.
 ```bash
 python -m src.qasper_base_rag.evaluate \
   --split validation \
-  --limit 20 \
   --top-k 5 \
   --output-predictions outputs/base_rag_qasper_predictions.jsonl \
   --output-summary outputs/base_rag_qasper_summary.json
+```
+
+For a quick smoke test, add a small limit:
+
+```bash
+python -m src.qasper_base_rag.evaluate --split validation --limit 5
 ```
 
 Artifacts:
