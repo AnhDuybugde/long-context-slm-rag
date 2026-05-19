@@ -95,5 +95,6 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 ## Qasper Loading Fix On 2026-05-19
 
 - Kaggle can install a new `datasets` version where dataset scripts are no longer supported, causing `RuntimeError: Dataset scripts are no longer supported, but found qasper.py`.
-- Fix: pin `datasets>=2.19.0,<4.0.0` and use `load_dataset("allenai/qasper", trust_remote_code=True)`.
+- First attempted fix was to pin `datasets>=2.19.0,<4.0.0` and use `trust_remote_code=True`, but Kaggle still reported that `trust_remote_code` is no longer supported.
+- Stable fix: load the standard Qasper Parquet exports directly via `load_dataset("parquet", data_files=...)`.
 - The HF token warning is not the root error; it only warns about unauthenticated rate limits.

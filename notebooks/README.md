@@ -4,8 +4,8 @@ Use this folder for Colab/Kaggle experiments.
 
 Current notebook flow:
 
-1. Install `datasets>=2.19.0,<4.0.0`.
-2. Load Qasper directly with `datasets.load_dataset("allenai/qasper", trust_remote_code=True)`.
+1. Install `datasets` and `pyarrow`.
+2. Load Qasper from its Hugging Face Parquet exports with `datasets.load_dataset("parquet", data_files=...)`.
 3. Inspect dataset splits, schema, sample document text, and QA pairs.
 4. Export a small validation preview JSONL.
 

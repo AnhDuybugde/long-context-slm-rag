@@ -7,6 +7,16 @@ from datasets import load_dataset
 
 from .chunking import Chunk, chunk_words
 
+QASPER_REVISION = "cc58ffb39db7ff6ce1951e28e029996bf499304e"
+QASPER_BASE_URL = (
+    f"https://huggingface.co/datasets/allenai/qasper/resolve/{QASPER_REVISION}/qasper"
+)
+QASPER_PARQUET_FILES = {
+    "train": f"{QASPER_BASE_URL}/qasper-train.parquet",
+    "validation": f"{QASPER_BASE_URL}/qasper-validation.parquet",
+    "test": f"{QASPER_BASE_URL}/qasper-test.parquet",
+}
+
 
 @dataclass(frozen=True)
 class QAExample:
@@ -19,7 +29,10 @@ class QAExample:
 
 
 def load_qasper(split: str = "validation"):
-    return load_dataset("allenai/qasper", split=split, trust_remote_code=True)
+    if split not in QASPER_PARQUET_FILES:
+        valid_splits = ", ".join(QASPER_PARQUET_FILES)
+        raise ValueError(f"Unknown split '{split}'. Expected one of: {valid_splits}")
+    return load_dataset("parquet", data_files={split: QASPER_PARQUET_FILES[split]}, split=split)
 
 
 def _normalise_answer(answer: dict[str, Any]) -> str | None:
