@@ -77,3 +77,10 @@ Created a base Qasper RAG scaffold:
 - `docs/baseline_scope.md`
 
 Verified with `python -m py_compile` for all source modules. Did not run full dataset/model evaluation locally because it would require downloading Qasper and Hugging Face models.
+
+## GitHub Push On 2026-05-19
+
+- Initialized local git repository.
+- Created branch `main`.
+- Added remote `origin`: `https://github.com/AnhDuybugde/long-context-slm-rag.git`
+- Pushed initial baseline commit `85be98b` to `origin/main`.
