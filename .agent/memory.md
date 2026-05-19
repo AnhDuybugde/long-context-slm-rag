@@ -117,3 +117,10 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - Trainer writes both JSONL predictions and JSON summary artifacts.
 - Added trainer unit test with a fake pipeline so tests do not download models.
 - Updated notebook with an optional Base RAG Training Runner section that calls the `.py` CLI after repo code is available in Kaggle/Colab.
+
+## Kaggle Self-Contained Runner On 2026-05-19
+
+- User reported Kaggle cannot import from repo files.
+- Updated `notebooks/qasper_base_rag_colab.ipynb` to include a self-contained baseline RAG runner instead of requiring `src/qasper_base_rag` imports.
+- The notebook now defines local OOP/data classes for chunks, QA examples, dense retriever, small generator, and base pipeline.
+- The `.py` files remain the source of truth and are tested; the notebook is a Kaggle-friendly runnable copy.
