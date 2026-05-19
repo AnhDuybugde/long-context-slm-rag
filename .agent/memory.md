@@ -106,3 +106,5 @@ Verified with `python -m py_compile` for all source modules. Did not run full da
 - Dataset features: `id`, `title`, `abstract`, `full_text`, `qas`, `figures_and_tables`.
 - Validation sample `1912.01214` has title `Cross-lingual Pre-training Based Transfer for Zero-shot Neural Machine Translation`, 4 QA pairs, and 17 full-text sections.
 - Important schema finding: for Parquet records, `qas["answers"][i]` is a dict of columns (`answer`, `annotation_id`, `worker_id`), not a plain list of answer records. `data.py` and notebook helpers must normalize this format before iterating answers.
+- Updated Kaggle output confirmed answer normalization works: `show_qa()` now prints full answer records, including `extractive_spans`, `free_form_answer`, `evidence`, `highlighted_evidence`, `annotation_id`, and `worker_id`.
+- Next implementation step can move from dataset exploration to the baseline RAG runner/evaluator.
