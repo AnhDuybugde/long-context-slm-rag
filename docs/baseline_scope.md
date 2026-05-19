@@ -59,3 +59,13 @@ These are intentionally excluded from the baseline and should be added one by on
 6. Add RAPTOR.
 7. Add SELF-ROUTE fallback.
 8. Move from Qasper to custom environmental data.
+
+## Development Workflow
+
+1. Implement or update `.py` source modules first.
+2. Run tests for the changed module.
+3. If tests fail, fix the source and rerun tests.
+4. If tests pass, continue to the next implementation step.
+5. Only after the `.py` workflow is stable, summarize the working code into `.ipynb` for Colab/Kaggle.
+
+The notebook should be an experiment runner, not the primary source of truth.

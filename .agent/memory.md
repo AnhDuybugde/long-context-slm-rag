@@ -59,6 +59,7 @@ Key implementation choices:
 - Build a base RAG first and evaluate it before adding advanced improvements.
 - Code should be in `.py` files, with a separate folder for `.ipynb` notebooks so training/evaluation can run on Kaggle or Colab.
 - The current deliverable must clearly explain what the base RAG includes and what it intentionally does not improve yet.
+- Development workflow: code `.py` files first, test them, fix failures until success, then move to the next step. After source code is stable, summarize it into `.ipynb`. Prefer OOP where it helps keep components swappable.
 
 ## Implemented Baseline Scaffold On 2026-05-19
 
