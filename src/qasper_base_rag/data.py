@@ -19,7 +19,7 @@ class QAExample:
 
 
 def load_qasper(split: str = "validation"):
-    return load_dataset("allenai/qasper", split=split)
+    return load_dataset("allenai/qasper", split=split, trust_remote_code=True)
 
 
 def _normalise_answer(answer: dict[str, Any]) -> str | None:

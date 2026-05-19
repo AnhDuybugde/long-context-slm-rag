@@ -25,6 +25,11 @@ pip install -r requirements.txt
 python -m src.qasper_base_rag.evaluate --split validation --limit 20
 ```
 
+Qasper uses a Hugging Face dataset script. If Kaggle installs a very new
+`datasets` version, `load_dataset("allenai/qasper")` can fail with
+`Dataset scripts are no longer supported`. Use `datasets<4.0.0` and load with
+`trust_remote_code=True`.
+
 The evaluator exports per-example JSONL records and prints the four main RAG comparison metrics:
 
 - `context_precision`
