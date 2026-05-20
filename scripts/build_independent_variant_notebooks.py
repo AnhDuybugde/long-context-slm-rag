@@ -9,21 +9,60 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE_NOTEBOOK = ROOT / "notebooks" / "independent_variants" / "qasper_base_dense_standalone.ipynb"
 OUTPUT_DIR = ROOT / "notebooks" / "independent_variants"
 
-BASE_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
-# If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
-!pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
-!pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0"
+BASE_SETUP_CELL = '''# Kaggle/Colab setup. Run this cell first.
+# The first run installs pinned binary packages and restarts the kernel.
+# After the kernel reconnects, rerun this cell once and then continue.
+import importlib.metadata as importlib_metadata
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+SETUP_MARKER = Path("/tmp/qasper_notebook_setup_numpy_scipy_sklearn_v3")
+CORE_PACKAGES = {
+    "numpy": "2.0.2",
+    "scipy": "1.14.1",
+    "scikit-learn": "1.6.1",
+}
+EXTRA_PACKAGES = [
+    "datasets>=2.19.0,<4.0.0",
+    "pyarrow>=15.0.0",
+    "sentence-transformers==3.0.1",
+    "transformers==4.44.2",
+    "tqdm>=4.66.0",
+]
+
+def installed_version(package_name):
+    try:
+        return importlib_metadata.version(package_name)
+    except importlib_metadata.PackageNotFoundError:
+        return None
+
+def core_versions_match():
+    return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
+
+core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
+
+if not SETUP_MARKER.exists() or not core_versions_match():
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs, *EXTRA_PACKAGES])
+    SETUP_MARKER.write_text("ok", encoding="utf-8")
+    print("Pinned dependencies were installed.")
+    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
+    os._exit(0)
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", *core_specs, *EXTRA_PACKAGES])
 
 import numpy as np
 import scipy
 import sklearn
 from sentence_transformers import SentenceTransformer
 
-if np.__version__ != "1.26.4":
-    raise RuntimeError(
-        f"Loaded numpy {np.__version__}, expected 1.26.4. "
-        "Restart the Kaggle/Colab session, then rerun from the first cell."
-    )
+if np.__version__ != CORE_PACKAGES["numpy"]:
+    raise RuntimeError("Loaded an unexpected NumPy version. Restart the kernel, then rerun this cell.")
+if scipy.__version__ != CORE_PACKAGES["scipy"]:
+    raise RuntimeError("Loaded an unexpected SciPy version. Restart the kernel, then rerun this cell.")
+if sklearn.__version__ != CORE_PACKAGES["scikit-learn"]:
+    raise RuntimeError("Loaded an unexpected scikit-learn version. Restart the kernel, then rerun this cell.")
 
 print("Dependency sanity check OK:")
 print("numpy", np.__version__)
@@ -31,21 +70,62 @@ print("scipy", scipy.__version__)
 print("scikit-learn", sklearn.__version__)
 '''
 
-LEIDEN_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
-# If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
-!pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
-!pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0" "igraph>=0.11.0" "leidenalg>=0.10.0"
+LEIDEN_SETUP_CELL = '''# Kaggle/Colab setup. Run this cell first.
+# The first run installs pinned binary packages and restarts the kernel.
+# After the kernel reconnects, rerun this cell once and then continue.
+import importlib.metadata as importlib_metadata
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+SETUP_MARKER = Path("/tmp/qasper_notebook_setup_numpy_scipy_sklearn_leiden_v3")
+CORE_PACKAGES = {
+    "numpy": "2.0.2",
+    "scipy": "1.14.1",
+    "scikit-learn": "1.6.1",
+}
+EXTRA_PACKAGES = [
+    "datasets>=2.19.0,<4.0.0",
+    "pyarrow>=15.0.0",
+    "sentence-transformers==3.0.1",
+    "transformers==4.44.2",
+    "tqdm>=4.66.0",
+    "igraph>=0.11.0",
+    "leidenalg>=0.10.0",
+]
+
+def installed_version(package_name):
+    try:
+        return importlib_metadata.version(package_name)
+    except importlib_metadata.PackageNotFoundError:
+        return None
+
+def core_versions_match():
+    return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
+
+core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
+
+if not SETUP_MARKER.exists() or not core_versions_match():
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs, *EXTRA_PACKAGES])
+    SETUP_MARKER.write_text("ok", encoding="utf-8")
+    print("Pinned dependencies were installed.")
+    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
+    os._exit(0)
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", *core_specs, *EXTRA_PACKAGES])
 
 import numpy as np
 import scipy
 import sklearn
 from sentence_transformers import SentenceTransformer
 
-if np.__version__ != "1.26.4":
-    raise RuntimeError(
-        f"Loaded numpy {np.__version__}, expected 1.26.4. "
-        "Restart the Kaggle/Colab session, then rerun from the first cell."
-    )
+if np.__version__ != CORE_PACKAGES["numpy"]:
+    raise RuntimeError("Loaded an unexpected NumPy version. Restart the kernel, then rerun this cell.")
+if scipy.__version__ != CORE_PACKAGES["scipy"]:
+    raise RuntimeError("Loaded an unexpected SciPy version. Restart the kernel, then rerun this cell.")
+if sklearn.__version__ != CORE_PACKAGES["scikit-learn"]:
+    raise RuntimeError("Loaded an unexpected scikit-learn version. Restart the kernel, then rerun this cell.")
 
 print("Dependency sanity check OK:")
 print("numpy", np.__version__)
@@ -682,7 +762,13 @@ def source_lines(text: str) -> list[str]:
 
 def build_notebook(base: dict, *, variant: str, meta: dict[str, str]) -> dict:
     notebook = copy.deepcopy(base)
-    notebook["cells"][0]["source"] = source_lines(f"# {meta['title']}\n\n{meta['description']}\n\nNotebook nay tu chua toan bo code de chay tren Kaggle/Colab. Khong clone repo, khong import tu `src/`. Mac dinh chi chay paper co `MIN_DOC_WORDS >= 3000` de tap trung vao long-context.\n")
+    notebook["cells"][0]["source"] = source_lines(
+        f"# {meta['title']}\n\n"
+        f"{meta['description']}\n\n"
+        "This standalone notebook contains all code needed to run on Kaggle/Colab. "
+        "It does not clone the repo and does not import from `src/`. "
+        "By default it only runs papers with `MIN_DOC_WORDS >= 3000` to focus on long-context cases.\n"
+    )
     notebook["cells"][2]["source"] = source_lines(CONFIG_TEMPLATE.format(variant=variant))
     notebook["cells"][7]["source"] = source_lines(PIPELINES_CODE)
     notebook["cells"][8]["source"] = source_lines(RUN_CODE)
