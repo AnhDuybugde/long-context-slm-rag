@@ -305,3 +305,23 @@ Active Kaggle standalone notebooks for the independent comparison:
 | `qasper_raptor_leiden_abstractive_standalone.ipynb` | `raptor_leiden_abstractive` | More faithful RAPTOR with abstractive parent summaries and Leiden if available. | RAPTOR-Leiden metrics, predictions, parent count, and backend metadata. |
 
 All experiment notebooks default to `SPLIT="validation"`, `MIN_DOC_WORDS=3000`, `LIMIT=None`, and write to `outputs/independent/`. Use `LIMIT=10` first for smoke tests, then run full. After running all notebooks, collect each `*_summary.json` into one comparison table with F1, answer string recall, context precision/recall, faithfulness, answer relevancy, runtime, and seconds/example. Then inspect `*_predictions.jsonl` for the winning and losing variants, choose the best method, and tune only that method next.
+
+## Kaggle/Colab NumPy Import Fix On 2026-05-20
+
+User reported `ImportError: cannot import name '_center' from 'numpy._core.umath'`, matching a known `sentence_transformers -> sklearn -> scipy -> numpy` import failure in Python 3.12 notebooks when loose dependency pins pull incompatible/broken scientific stack versions.
+
+Fixed all active `notebooks/independent_variants/` setup cells by pinning:
+
+- `numpy==1.26.4`
+- `scipy==1.13.1`
+- `scikit-learn==1.5.2`
+- `sentence-transformers==3.0.1`
+- `transformers==4.44.2`
+- `datasets>=2.19.0,<4.0.0`
+
+Also updated `requirements.txt` and `scripts/build_independent_variant_notebooks.py` so regenerated notebooks keep the same pins. The setup cell now notes that if the error already happened in the current notebook session, restart the Kaggle/Colab runtime before rerunning from the top.
+
+Verification after fix:
+
+- All active notebook code cells compile after filtering shell-magics.
+- `python -m unittest discover -s tests`: 22 tests passed.

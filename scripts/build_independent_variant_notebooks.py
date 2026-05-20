@@ -9,6 +9,18 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE_NOTEBOOK = ROOT / "notebooks" / "independent_variants" / "qasper_base_dense_standalone.ipynb"
 OUTPUT_DIR = ROOT / "notebooks" / "independent_variants"
 
+BASE_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
+# If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
+!pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
+!pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0"
+'''
+
+LEIDEN_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
+# If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
+!pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
+!pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0" "igraph>=0.11.0" "leidenalg>=0.10.0"
+'''
+
 
 VARIANTS = {
     "semantic_chunking_dense": {
@@ -643,10 +655,9 @@ def build_notebook(base: dict, *, variant: str, meta: dict[str, str]) -> dict:
     notebook["cells"][7]["source"] = source_lines(PIPELINES_CODE)
     notebook["cells"][8]["source"] = source_lines(RUN_CODE)
     if variant == "raptor_leiden_abstractive":
-        notebook["cells"][1]["source"] = source_lines(
-            '# Kaggle/Colab setup. Run once per fresh session.\n'
-            '!pip -q install -U "datasets>=2.19.0" "pyarrow>=15.0.0" "sentence-transformers>=2.7.0" "transformers>=4.41.0" "torch>=2.2.0" "numpy>=1.26.0" "tqdm>=4.66.0" "igraph>=0.11.0" "leidenalg>=0.10.0"\n'
-        )
+        notebook["cells"][1]["source"] = source_lines(LEIDEN_SETUP_CELL)
+    else:
+        notebook["cells"][1]["source"] = source_lines(BASE_SETUP_CELL)
     for cell in notebook["cells"]:
         if cell.get("cell_type") == "code":
             cell["outputs"] = []
