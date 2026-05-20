@@ -6,4 +6,7 @@ torch>=2.2.0
 numpy==2.0.2
 scipy==1.14.1
 scikit-learn==1.6.1
+pandas==2.2.2
+requests==2.32.4
+pillow==11.3.0
 tqdm>=4.66.0
