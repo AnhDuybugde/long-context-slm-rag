@@ -99,6 +99,13 @@ def u_shaped_reorder(chunks: list[Chunk]) -> list[Chunk]:
     return [chunk for chunk in reordered if chunk is not None]
 
 
+def recency_heavy_reorder(chunks: list[Chunk]) -> list[Chunk]:
+    """Place the strongest chunk last, matching SLM recency-bias experiments."""
+    if len(chunks) <= 1:
+        return chunks
+    return list(reversed(chunks))
+
+
 class ImprovedSeq2SeqGenerator(SmallSeq2SeqGenerator):
     def answer(
         self,

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import torch
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-
 from .chunking import Chunk
 
 
 class SmallSeq2SeqGenerator:
     def __init__(self, model_name: str = "google/flan-t5-base"):
+        import torch
+        from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"

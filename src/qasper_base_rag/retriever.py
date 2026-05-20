@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
 
 from .chunking import Chunk
 
 
 class DenseRetriever:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+        from sentence_transformers import SentenceTransformer
+
         self.model = SentenceTransformer(model_name)
         self.chunks: list[Chunk] = []
         self.embeddings: np.ndarray | None = None

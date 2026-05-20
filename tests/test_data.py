@@ -1,6 +1,13 @@
 import unittest
 
-from src.qasper_base_rag.data import build_document_chunks, extract_qa_examples, iter_answer_records
+from src.qasper_base_rag.data import (
+    build_document_chunks,
+    document_text,
+    document_word_count,
+    extract_qa_examples,
+    is_long_context_record,
+    iter_answer_records,
+)
 
 
 class DataTest(unittest.TestCase):
@@ -87,6 +94,21 @@ class DataTest(unittest.TestCase):
 
         self.assertTrue(any(chunk.section == "abstract" for chunk in chunks))
         self.assertTrue(any(chunk.section == "Introduction" for chunk in chunks))
+
+    def test_document_word_count_supports_long_context_filter(self):
+        record = {
+            "id": "doc-1",
+            "abstract": "one two",
+            "full_text": {
+                "section_name": ["Intro"],
+                "paragraphs": [["three four five", "six seven"]],
+            },
+        }
+
+        self.assertIn("Intro", document_text(record))
+        self.assertEqual(document_word_count(record), 8)
+        self.assertTrue(is_long_context_record(record, min_words=8))
+        self.assertFalse(is_long_context_record(record, min_words=9))
 
 
 if __name__ == "__main__":

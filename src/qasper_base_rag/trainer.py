@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Protocol
 
@@ -57,6 +57,7 @@ class EvaluationResult:
     faithfulness: float
     answer_relevancy: float
     contexts: list[dict[str, Any]]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class MetricsAccumulator:
@@ -142,6 +143,11 @@ class BaseRAGTrainer:
         contexts = answer_result["contexts"]
         scores = answer_result["scores"]
         prediction = answer_result["answer"]
+        metadata = {
+            key: value
+            for key, value in answer_result.items()
+            if key not in {"answer", "contexts", "scores"}
+        }
 
         return EvaluationResult(
             doc_id=example.doc_id,
@@ -158,6 +164,7 @@ class BaseRAGTrainer:
             faithfulness=faithfulness(prediction, contexts),
             answer_relevancy=answer_relevancy(prediction, example.question, example.gold_answers),
             contexts=self._serialise_contexts(contexts, scores),
+            metadata=metadata,
         )
 
     def _write_summary(

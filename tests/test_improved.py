@@ -1,7 +1,13 @@
 import unittest
 
 from src.qasper_base_rag.chunking import Chunk
-from src.qasper_base_rag.improved import BM25Retriever, reciprocal_rank_fusion, tokenize, u_shaped_reorder
+from src.qasper_base_rag.improved import (
+    BM25Retriever,
+    reciprocal_rank_fusion,
+    recency_heavy_reorder,
+    tokenize,
+    u_shaped_reorder,
+)
 
 
 class ImprovedRAGTest(unittest.TestCase):
@@ -35,6 +41,13 @@ class ImprovedRAGTest(unittest.TestCase):
 
         self.assertEqual(reordered[0].chunk_id, "c0")
         self.assertEqual(reordered[-1].chunk_id, "c1")
+
+    def test_recency_heavy_reorder_places_best_at_end(self):
+        chunks = [Chunk(f"c{i}", "d1", "Paper", "s", str(i)) for i in range(4)]
+
+        reordered = recency_heavy_reorder(chunks)
+
+        self.assertEqual(reordered[-1].chunk_id, "c0")
 
 
 if __name__ == "__main__":

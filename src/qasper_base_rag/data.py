@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from datasets import load_dataset
-
 from .chunking import Chunk, chunk_words
 
 QASPER_REVISION = "cc58ffb39db7ff6ce1951e28e029996bf499304e"
@@ -32,7 +30,35 @@ def load_qasper(split: str = "validation"):
     if split not in QASPER_PARQUET_FILES:
         valid_splits = ", ".join(QASPER_PARQUET_FILES)
         raise ValueError(f"Unknown split '{split}'. Expected one of: {valid_splits}")
+    from datasets import load_dataset
+
     return load_dataset("parquet", data_files={split: QASPER_PARQUET_FILES[split]}, split=split)
+
+
+def document_text(record: dict[str, Any]) -> str:
+    """Return the full paper text used for long-context length checks."""
+    parts = []
+    abstract = str(record.get("abstract", "")).strip()
+    if abstract:
+        parts.append(abstract)
+
+    full_text = record.get("full_text", {})
+    sections = full_text.get("section_name", [])
+    paragraphs_by_section = full_text.get("paragraphs", [])
+    for section, paragraphs in zip(sections, paragraphs_by_section):
+        section_parts = [str(section).strip()] if str(section).strip() else []
+        section_parts.extend(str(paragraph).strip() for paragraph in paragraphs if str(paragraph).strip())
+        if section_parts:
+            parts.append("\n".join(section_parts))
+    return "\n\n".join(parts)
+
+
+def document_word_count(record: dict[str, Any]) -> int:
+    return len(document_text(record).split())
+
+
+def is_long_context_record(record: dict[str, Any], *, min_words: int = 3000) -> bool:
+    return document_word_count(record) >= min_words
 
 
 def _normalise_answer(answer: dict[str, Any]) -> str | None:
