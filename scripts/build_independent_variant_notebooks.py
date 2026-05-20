@@ -31,6 +31,7 @@ EXTRA_PACKAGES = [
     "transformers==4.44.2",
     "tqdm>=4.66.0",
 ]
+CONFLICT_PACKAGES = ["torchvision"]
 
 def installed_version(package_name):
     try:
@@ -42,6 +43,15 @@ def core_versions_match():
     return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
 
 core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
+installed_conflicts = [name for name in CONFLICT_PACKAGES if installed_version(name) is not None]
+
+if installed_conflicts:
+    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", *installed_conflicts])
+    if SETUP_MARKER.exists():
+        SETUP_MARKER.unlink()
+    print("Removed conflicting packages:", ", ".join(installed_conflicts))
+    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
+    os._exit(0)
 
 if not SETUP_MARKER.exists() or not core_versions_match():
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs, *EXTRA_PACKAGES])
@@ -94,6 +104,7 @@ EXTRA_PACKAGES = [
     "igraph>=0.11.0",
     "leidenalg>=0.10.0",
 ]
+CONFLICT_PACKAGES = ["torchvision"]
 
 def installed_version(package_name):
     try:
@@ -105,6 +116,15 @@ def core_versions_match():
     return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
 
 core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
+installed_conflicts = [name for name in CONFLICT_PACKAGES if installed_version(name) is not None]
+
+if installed_conflicts:
+    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", *installed_conflicts])
+    if SETUP_MARKER.exists():
+        SETUP_MARKER.unlink()
+    print("Removed conflicting packages:", ", ".join(installed_conflicts))
+    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
+    os._exit(0)
 
 if not SETUP_MARKER.exists() or not core_versions_match():
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs, *EXTRA_PACKAGES])
