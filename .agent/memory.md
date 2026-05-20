@@ -325,3 +325,9 @@ Verification after fix:
 
 - All active notebook code cells compile after filtering shell-magics.
 - `python -m unittest discover -s tests`: 22 tests passed.
+
+Follow-up fix in the `.ipynb` files themselves:
+
+- Added a dependency sanity check directly after the pip install lines in every active `notebooks/independent_variants/*.ipynb`.
+- The check imports `numpy`, `scipy`, `sklearn`, and `SentenceTransformer`, verifies `numpy==1.26.4`, and prints package versions.
+- If Kaggle/Colab still has an old NumPy module loaded, the notebook now fails early with a clear instruction to restart the session and rerun from the first cell.

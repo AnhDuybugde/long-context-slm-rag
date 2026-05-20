@@ -13,12 +13,44 @@ BASE_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
 # If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
 !pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
 !pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0"
+
+import numpy as np
+import scipy
+import sklearn
+from sentence_transformers import SentenceTransformer
+
+if np.__version__ != "1.26.4":
+    raise RuntimeError(
+        f"Loaded numpy {np.__version__}, expected 1.26.4. "
+        "Restart the Kaggle/Colab session, then rerun from the first cell."
+    )
+
+print("Dependency sanity check OK:")
+print("numpy", np.__version__)
+print("scipy", scipy.__version__)
+print("scikit-learn", sklearn.__version__)
 '''
 
 LEIDEN_SETUP_CELL = '''# Kaggle/Colab setup. Run once per fresh session.
 # If you already hit a NumPy/SciPy import error, restart the notebook session before rerunning from the top.
 !pip -q install --no-cache-dir --force-reinstall "numpy==1.26.4" "scipy==1.13.1" "scikit-learn==1.5.2"
 !pip -q install --no-cache-dir "datasets>=2.19.0,<4.0.0" "pyarrow>=15.0.0" "sentence-transformers==3.0.1" "transformers==4.44.2" "tqdm>=4.66.0" "igraph>=0.11.0" "leidenalg>=0.10.0"
+
+import numpy as np
+import scipy
+import sklearn
+from sentence_transformers import SentenceTransformer
+
+if np.__version__ != "1.26.4":
+    raise RuntimeError(
+        f"Loaded numpy {np.__version__}, expected 1.26.4. "
+        "Restart the Kaggle/Colab session, then rerun from the first cell."
+    )
+
+print("Dependency sanity check OK:")
+print("numpy", np.__version__)
+print("scipy", scipy.__version__)
+print("scikit-learn", sklearn.__version__)
 '''
 
 
