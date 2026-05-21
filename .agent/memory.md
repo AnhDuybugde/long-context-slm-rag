@@ -1,6 +1,6 @@
 # Agent Memory
 
-Last update time: 2026-05-19 Asia/Bangkok
+Last update time: 2026-05-20 Asia/Bangkok
 
 Read this file before doing something new. If a task is verified successfully, update this file with new confirmed information.
 
@@ -331,3 +331,93 @@ Follow-up fix in the `.ipynb` files themselves:
 - Added a dependency sanity check directly after the pip install lines in every active `notebooks/independent_variants/*.ipynb`.
 - The check imports `numpy`, `scipy`, `sklearn`, and `SentenceTransformer`, verifies `numpy==1.26.4`, and prints package versions.
 - If Kaggle/Colab still has an old NumPy module loaded, the notebook now fails early with a clear instruction to restart the session and rerun from the first cell.
+
+## Kaggle Kernel Die Fix On 2026-05-20
+
+User reported that running the standalone independent variant notebooks killed the kernel and training could not start.
+
+Root cause found locally: setup cells in `notebooks/independent_variants/*.ipynb` still called `os._exit(0)` after package install/uninstall and still pinned `numpy==2.0.2`, contradicting the stable NumPy fix recorded above. This made Kaggle/Colab look like the kernel died, and could also reintroduce binary-stack instability.
+
+Fix applied:
+
+- Removed `os._exit(0)` from all active standalone notebooks; setup cells now raise `SystemExit` with a manual restart instruction instead of force-killing the process.
+- Restored stable dependency pins in notebooks and `requirements.txt`: `numpy==1.26.4`, `scipy==1.13.1`, `scikit-learn==1.5.2`.
+- Updated `scripts/build_independent_variant_notebooks.py` so regenerated advanced notebooks keep the same safe setup behavior and dependency pins.
+- Added `model.eval()` and `torch.inference_mode()` to `SmallSeq2SeqGenerator`; generation now uses `num_beams=1` to lower VRAM/RAM pressure during full validation.
+- Added `scripts/repair_independent_notebooks.py` as a structured JSON notebook repair helper for applying these runtime-safety fixes across all independent notebooks.
+
+Verification:
+
+- `Select-String` found no remaining `os._exit`, `numpy==2.0.2`, or `num_beams=2` in active notebooks/generator script.
+- All active independent notebook code cells compile.
+- `python -m unittest discover -s tests`: 22 tests passed.
+- `python -m py_compile src/qasper_base_rag/generator.py scripts/build_independent_variant_notebooks.py scripts/repair_independent_notebooks.py`: passed.
+
+## Kaggle Simple Setup Correction On 2026-05-20
+
+User reported Kaggle dependency resolver conflicts after the pinned setup downgraded NumPy/scikit-learn and removed `torchvision`. Current correction:
+
+- Active independent notebooks now use a simple setup cell: no forced reinstall, no NumPy/SciPy/scikit-learn pins, no `torchvision` uninstall, no `SystemExit`, no restart requirement.
+- The setup cell only checks required imports and runs `pip install -q <missing packages>` if a package is absent.
+- `raptor_leiden_abstractive` still includes optional `igraph`/`leidenalg` in the missing-package check; other notebooks avoid those extras.
+- `requirements.txt` now uses broad scientific stack ranges instead of exact pins: `numpy>=1.26,<3`, `scipy>=1.13,<2`, `scikit-learn>=1.5,<2`.
+- Verification: no active notebook or notebook builder contains `force-reinstall`, `SystemExit`, `os._exit`, `numpy==`, `scipy==`, `scikit-learn==`, `torchvision`, or `--no-deps`; all active notebook code cells compile.
+
+## Survey Notebook JSONL Output On 2026-05-20
+
+User reported `qasper_long_context_survey_standalone` only produced the aggregate JSON, not JSONL.
+
+Updated `notebooks/independent_variants/qasper_long_context_survey_standalone.ipynb` so `run_long_context_survey()` writes:
+
+- `outputs/independent/qasper_long_context_survey_validation.json`: aggregate summary.
+- `outputs/independent/qasper_long_context_survey_validation_documents.jsonl`: one row per Qasper document with `split`, `doc_id`, `title`, `word_count`, `qa_examples`, and threshold boolean flags.
+- `outputs/independent/qasper_long_context_survey_validation_thresholds.jsonl`: one row per threshold with document/QA counts and rates.
+
+The returned summary now includes `summary_path`, `documents_jsonl_path`, and `thresholds_jsonl_path`. Verified the survey notebook code cells compile.
+
+## Independent Variant Results On 2026-05-20
+
+User ran all active independent Qasper validation notebooks with `MIN_DOC_WORDS=3000`, `LIMIT=None`. Local `notebooks/output/` contains the nine `*_validation_min3000_summary.json` files for active variants.
+
+Shared run context:
+
+- Split: `validation`
+- Minimum document length: `3000` words
+- Documents seen: `165`
+- QA examples: `583`
+
+Comparison table from `notebooks/output/*validation_min3000_summary.json`:
+
+| Variant | F1 | Answer Recall@5 | Context Recall | Context Precision | Faithfulness | Relevancy | Runtime | Interpretation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `base_dense` | 0.1165 | 0.2018 | 0.4147 | 0.6021 | 0.5472 | 0.0411 | 179.79s | Baseline is stable. |
+| `bm25_only` | 0.0891 | 0.1795 | 0.3504 | 0.6153 | 0.5437 | 0.0293 | 145.84s | Fast, but weaker F1 and recall. |
+| `dense_u_shape` | 0.1043 | 0.2018 | 0.4147 | 0.6021 | 0.5232 | 0.0407 | 177.60s | U-shaped ordering did not improve over baseline. |
+| `dense_recency_heavy` | 0.1047 | 0.2018 | 0.4147 | 0.6021 | 0.5146 | 0.0426 | 169.66s | Recency-heavy ordering did not clearly help. |
+| `hybrid_rrf` | 0.1021 | 0.2053 | 0.4280 | 0.6343 | 0.5643 | 0.0397 | 186.96s | Slight retrieval/faithfulness gain, but no F1 gain. |
+| `semantic_chunking_dense` | 0.2256 | 0.1561 | 0.3279 | 0.5300 | 0.3722 | 0.1356 | 221.20s | Best answer F1/relevancy, but low retrieval and faithfulness metrics need prediction-level inspection. |
+| `dense_reranker` | 0.1190 | 0.2207 | 0.4603 | 0.6518 | 0.5506 | 0.0456 | 210.81s | Best retrieval quality; strong candidate for further RAG tuning. |
+| `raptor_extractive` | 0.1425 | 0.1838 | 0.3719 | 0.5743 | 0.4803 | 0.0755 | 3043.50s | F1 improves, but runtime is very expensive. |
+| `raptor_leiden_abstractive` | 0.1522 | 0.1787 | 0.3521 | 0.4868 | 0.4648 | 0.0864 | 1655.36s | Better F1 than baseline, but slower and weaker retrieval. |
+
+Current interpretation:
+
+- If optimizing directly for answer F1, `semantic_chunking_dense` is the top result, but its low context recall/precision and faithfulness mean this result should be checked in `*_predictions.jsonl` before choosing it as the main research direction.
+- If choosing the most defensible RAG improvement based on retrieval quality, `dense_reranker` is the strongest next method: best Answer Recall@5, Context Recall, and Context Precision.
+- `hybrid_rrf` is useful evidence that sparse+dense fusion helps retrieval slightly, but the current generator does not convert that into answer F1.
+- RAPTOR variants are not cost-effective yet for this setup; they may be revisited only after cheaper methods are exhausted.
+- `dense_u_shape` and `dense_recency_heavy` have no clear positive signal in this batch.
+
+Recommended next step: inspect prediction-level failure cases for `semantic_chunking_dense` and `dense_reranker`, then choose one method to tune further. For a conservative research narrative, `dense_reranker` is currently the best method to develop next; for a metric-winning narrative, investigate whether `semantic_chunking_dense` is genuinely answering better or exploiting metric artifacts.
+
+## Output Summary Report On 2026-05-21
+
+Created `notebooks/output/independent_validation_min3000_summary.md` as the consolidated report for the local Kaggle outputs.
+
+Additional prediction-level checks from available `*_predictions.jsonl` files:
+
+- `semantic_chunking_dense`: lowest `Unanswerable` rate among checked variants (`132/583`, 0.23) and highest rate of examples with Token F1 > 0 (`288/583`, 0.49). This explains its strong F1, but the low context recall/precision/faithfulness still requires qualitative inspection before treating it as the best grounded RAG method.
+- `dense_reranker`: strongest retrieval-oriented method; highest available count of examples with Answer Recall@5 > 0 (`178/583`) and best aggregate Answer Recall@5, Context Recall, and Context Precision.
+- Local output contains `raptor_extractive_validation_min3000_summary.json`, but no `raptor_extractive_validation_min3000_predictions.jsonl`, so prediction-level stats for `raptor_extractive` were not included in the report.
+
+Current reporting recommendation: present a two-track conclusion. `semantic_chunking_dense` is the metric winner for lexical answer quality, while `dense_reranker` is the more defensible next method for grounded RAG tuning. RAPTOR variants are currently too slow relative to their gains.

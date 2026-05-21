@@ -12,6 +12,7 @@ class SmallSeq2SeqGenerator:
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
+        self.model.eval()
 
     def answer(
         self,
@@ -36,10 +37,11 @@ class SmallSeq2SeqGenerator:
             truncation=True,
             max_length=max_input_tokens,
         ).to(self.device)
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=max_new_tokens,
-            num_beams=2,
-        )
+        with torch.inference_mode():
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                num_beams=1,
+            )
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 

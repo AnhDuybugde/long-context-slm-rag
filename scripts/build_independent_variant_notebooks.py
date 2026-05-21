@@ -9,172 +9,98 @@ ROOT = Path(__file__).resolve().parents[1]
 BASE_NOTEBOOK = ROOT / "notebooks" / "independent_variants" / "qasper_base_dense_standalone.ipynb"
 OUTPUT_DIR = ROOT / "notebooks" / "independent_variants"
 
-BASE_SETUP_CELL = '''# Kaggle/Colab setup. Run this cell first.
-# The first run installs pinned binary packages and restarts the kernel.
-# After the kernel reconnects, rerun this cell once and then continue.
+BASE_SETUP_CELL = '''# Simple Kaggle/Colab setup. Run this cell first.
+# Do not force reinstall Kaggle's scientific stack; only install packages if missing.
 import importlib.metadata as importlib_metadata
-import os
-from pathlib import Path
+import importlib.util
 import subprocess
 import sys
 
-SETUP_MARKER = Path("/tmp/qasper_notebook_setup_numpy_scipy_sklearn_v4")
-CORE_PACKAGES = {
-    "numpy": "2.0.2",
-    "scipy": "1.14.1",
-    "scikit-learn": "1.6.1",
-    "pandas": "2.2.2",
-    "requests": "2.32.4",
-    "pillow": "11.3.0",
+REQUIRED_PACKAGES = {
+    "datasets": "datasets",
+    "pyarrow": "pyarrow",
+    "sentence_transformers": "sentence-transformers",
+    "transformers": "transformers",
+    "torch": "torch",
+    "numpy": "numpy",
+    "sklearn": "scikit-learn",
+    "pandas": "pandas",
+    "tqdm": "tqdm",
 }
-EXTRA_PACKAGES = [
-    "datasets==3.6.0",
-    "pyarrow>=15.0.0",
-    "sentence-transformers==3.0.1",
-    "transformers==4.44.2",
-    "tqdm>=4.66.0",
-]
-CONFLICT_PACKAGES = ["torchvision"]
 
-def installed_version(package_name):
+missing = [package for module, package in REQUIRED_PACKAGES.items() if importlib.util.find_spec(module) is None]
+if missing:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", *missing])
+
+import numpy as np
+import pandas as pd
+import sklearn
+import torch
+from sentence_transformers import SentenceTransformer
+
+def version(package_name: str) -> str:
     try:
         return importlib_metadata.version(package_name)
     except importlib_metadata.PackageNotFoundError:
-        return None
+        return "not installed"
 
-def core_versions_match():
-    return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
-
-core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
-installed_conflicts = [name for name in CONFLICT_PACKAGES if installed_version(name) is not None]
-
-if installed_conflicts:
-    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", *installed_conflicts])
-    if SETUP_MARKER.exists():
-        SETUP_MARKER.unlink()
-    print("Removed conflicting packages:", ", ".join(installed_conflicts))
-    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
-    os._exit(0)
-
-if not SETUP_MARKER.exists() or not core_versions_match():
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--no-deps", *EXTRA_PACKAGES])
-    SETUP_MARKER.write_text("ok", encoding="utf-8")
-    print("Pinned dependencies were installed.")
-    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
-    os._exit(0)
-
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--no-deps", *EXTRA_PACKAGES])
-
-import numpy as np
-import scipy
-import sklearn
-import pandas as pd
-import requests
-from sentence_transformers import SentenceTransformer
-
-if np.__version__ != CORE_PACKAGES["numpy"]:
-    raise RuntimeError("Loaded an unexpected NumPy version. Restart the kernel, then rerun this cell.")
-if scipy.__version__ != CORE_PACKAGES["scipy"]:
-    raise RuntimeError("Loaded an unexpected SciPy version. Restart the kernel, then rerun this cell.")
-if sklearn.__version__ != CORE_PACKAGES["scikit-learn"]:
-    raise RuntimeError("Loaded an unexpected scikit-learn version. Restart the kernel, then rerun this cell.")
-if pd.__version__ != CORE_PACKAGES["pandas"]:
-    raise RuntimeError("Loaded an unexpected pandas version. Restart the kernel, then rerun this cell.")
-if requests.__version__ != CORE_PACKAGES["requests"]:
-    raise RuntimeError("Loaded an unexpected requests version. Restart the kernel, then rerun this cell.")
-
-print("Dependency sanity check OK:")
+print("Dependency check OK:")
+print("python", sys.version.split()[0])
 print("numpy", np.__version__)
-print("scipy", scipy.__version__)
-print("scikit-learn", sklearn.__version__)
 print("pandas", pd.__version__)
-print("requests", requests.__version__)
+print("scikit-learn", sklearn.__version__)
+print("torch", torch.__version__)
+print("transformers", version("transformers"))
+print("sentence-transformers", version("sentence-transformers"))
 '''
 
-LEIDEN_SETUP_CELL = '''# Kaggle/Colab setup. Run this cell first.
-# The first run installs pinned binary packages and restarts the kernel.
-# After the kernel reconnects, rerun this cell once and then continue.
+LEIDEN_SETUP_CELL = '''# Simple Kaggle/Colab setup. Run this cell first.
+# Do not force reinstall Kaggle's scientific stack; only install packages if missing.
 import importlib.metadata as importlib_metadata
-import os
-from pathlib import Path
+import importlib.util
 import subprocess
 import sys
 
-SETUP_MARKER = Path("/tmp/qasper_notebook_setup_numpy_scipy_sklearn_leiden_v4")
-CORE_PACKAGES = {
-    "numpy": "2.0.2",
-    "scipy": "1.14.1",
-    "scikit-learn": "1.6.1",
-    "pandas": "2.2.2",
-    "requests": "2.32.4",
-    "pillow": "11.3.0",
+REQUIRED_PACKAGES = {
+    "datasets": "datasets",
+    "pyarrow": "pyarrow",
+    "sentence_transformers": "sentence-transformers",
+    "transformers": "transformers",
+    "torch": "torch",
+    "numpy": "numpy",
+    "sklearn": "scikit-learn",
+    "pandas": "pandas",
+    "tqdm": "tqdm",
+    "igraph": "igraph",
+    "leidenalg": "leidenalg",
 }
-EXTRA_PACKAGES = [
-    "datasets==3.6.0",
-    "pyarrow>=15.0.0",
-    "sentence-transformers==3.0.1",
-    "transformers==4.44.2",
-    "tqdm>=4.66.0",
-    "igraph>=0.11.0",
-    "leidenalg>=0.10.0",
-]
-CONFLICT_PACKAGES = ["torchvision"]
 
-def installed_version(package_name):
+missing = [package for module, package in REQUIRED_PACKAGES.items() if importlib.util.find_spec(module) is None]
+if missing:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", *missing])
+
+import numpy as np
+import pandas as pd
+import sklearn
+import torch
+from sentence_transformers import SentenceTransformer
+
+def version(package_name: str) -> str:
     try:
         return importlib_metadata.version(package_name)
     except importlib_metadata.PackageNotFoundError:
-        return None
+        return "not installed"
 
-def core_versions_match():
-    return all(installed_version(name) == version for name, version in CORE_PACKAGES.items())
-
-core_specs = [f"{name}=={version}" for name, version in CORE_PACKAGES.items()]
-installed_conflicts = [name for name in CONFLICT_PACKAGES if installed_version(name) is not None]
-
-if installed_conflicts:
-    subprocess.check_call([sys.executable, "-m", "pip", "uninstall", "-y", *installed_conflicts])
-    if SETUP_MARKER.exists():
-        SETUP_MARKER.unlink()
-    print("Removed conflicting packages:", ", ".join(installed_conflicts))
-    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
-    os._exit(0)
-
-if not SETUP_MARKER.exists() or not core_versions_match():
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--force-reinstall", *core_specs])
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--no-deps", *EXTRA_PACKAGES])
-    SETUP_MARKER.write_text("ok", encoding="utf-8")
-    print("Pinned dependencies were installed.")
-    print("Restarting the kernel now. After it reconnects, rerun this cell once.")
-    os._exit(0)
-
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-cache-dir", "--no-deps", *EXTRA_PACKAGES])
-
-import numpy as np
-import scipy
-import sklearn
-import pandas as pd
-import requests
-from sentence_transformers import SentenceTransformer
-
-if np.__version__ != CORE_PACKAGES["numpy"]:
-    raise RuntimeError("Loaded an unexpected NumPy version. Restart the kernel, then rerun this cell.")
-if scipy.__version__ != CORE_PACKAGES["scipy"]:
-    raise RuntimeError("Loaded an unexpected SciPy version. Restart the kernel, then rerun this cell.")
-if sklearn.__version__ != CORE_PACKAGES["scikit-learn"]:
-    raise RuntimeError("Loaded an unexpected scikit-learn version. Restart the kernel, then rerun this cell.")
-if pd.__version__ != CORE_PACKAGES["pandas"]:
-    raise RuntimeError("Loaded an unexpected pandas version. Restart the kernel, then rerun this cell.")
-if requests.__version__ != CORE_PACKAGES["requests"]:
-    raise RuntimeError("Loaded an unexpected requests version. Restart the kernel, then rerun this cell.")
-
-print("Dependency sanity check OK:")
+print("Dependency check OK:")
+print("python", sys.version.split()[0])
 print("numpy", np.__version__)
-print("scipy", scipy.__version__)
-print("scikit-learn", sklearn.__version__)
 print("pandas", pd.__version__)
-print("requests", requests.__version__)
+print("scikit-learn", sklearn.__version__)
+print("torch", torch.__version__)
+print("transformers", version("transformers"))
+print("sentence-transformers", version("sentence-transformers"))
+print("igraph", version("igraph"))
+print("leidenalg", version("leidenalg"))
 '''
 
 
@@ -494,7 +420,8 @@ class AbstractiveClusterSummarizer:
             f"Passages:\n{source_text}\n\nSummary:"
         )
         inputs = self.generator.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=self.max_input_tokens).to(self.generator.device)
-        outputs = self.generator.model.generate(**inputs, max_new_tokens=self.max_new_tokens, num_beams=2)
+        with torch.inference_mode():
+            outputs = self.generator.model.generate(**inputs, max_new_tokens=self.max_new_tokens, num_beams=1)
         return self.generator.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
 
