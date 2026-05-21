@@ -1,0 +1,30 @@
+{
+  "variant": "dense_recency_heavy",
+  "split": "validation",
+  "min_doc_words": 3000,
+  "docs_seen": 165,
+  "runtime_seconds": 169.663724883,
+  "seconds_per_example": 0.291018396025729,
+  "config": {
+    "variant": "dense_recency_heavy",
+    "split": "validation",
+    "min_doc_words": 3000,
+    "limit": null,
+    "top_k": 5,
+    "retrieve_k": 20,
+    "chunk_size": 180,
+    "overlap": 40,
+    "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "generator_model": "google/flan-t5-base"
+  },
+  "metrics": {
+    "examples": 583,
+    "avg_token_f1": 0.10471642857982055,
+    "avg_answer_string_recall_at_5": 0.20182961692395654,
+    "avg_context_precision": 0.6020583190394527,
+    "avg_context_recall": 0.414677858159848,
+    "avg_faithfulness": 0.5145797598627787,
+    "avg_answer_relevancy": 0.04264383373565235
+  },
+  "predictions_path": "outputs/independent/dense_recency_heavy_validation_min3000_predictions.jsonl"
+}

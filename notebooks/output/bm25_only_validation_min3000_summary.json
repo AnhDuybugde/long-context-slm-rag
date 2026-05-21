@@ -1,0 +1,30 @@
+{
+  "variant": "bm25_only",
+  "split": "validation",
+  "min_doc_words": 3000,
+  "docs_seen": 165,
+  "runtime_seconds": 145.83726220100002,
+  "seconds_per_example": 0.2501496778747856,
+  "config": {
+    "variant": "bm25_only",
+    "split": "validation",
+    "min_doc_words": 3000,
+    "limit": null,
+    "top_k": 5,
+    "retrieve_k": 20,
+    "chunk_size": 180,
+    "overlap": 40,
+    "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "generator_model": "google/flan-t5-base"
+  },
+  "metrics": {
+    "examples": 583,
+    "avg_token_f1": 0.08907463859970899,
+    "avg_answer_string_recall_at_5": 0.17953116066323613,
+    "avg_context_precision": 0.6153230417381363,
+    "avg_context_recall": 0.35044591609771725,
+    "avg_faithfulness": 0.5437392795883362,
+    "avg_answer_relevancy": 0.02925172419777322
+  },
+  "predictions_path": "outputs/independent/bm25_only_validation_min3000_predictions.jsonl"
+}

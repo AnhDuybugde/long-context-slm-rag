@@ -1,0 +1,5 @@
+{"split": "validation", "threshold": 1000, "documents": 280, "document_rate": 0.99644128113879, "qa_examples": 1003, "qa_example_rate": 0.9980099502487563}
+{"split": "validation", "threshold": 3000, "documents": 165, "document_rate": 0.5871886120996441, "qa_examples": 583, "qa_example_rate": 0.5800995024875621}
+{"split": "validation", "threshold": 5000, "documents": 29, "document_rate": 0.10320284697508897, "qa_examples": 94, "qa_example_rate": 0.09353233830845771}
+{"split": "validation", "threshold": 8000, "documents": 9, "document_rate": 0.03202846975088968, "qa_examples": 30, "qa_example_rate": 0.029850746268656716}
+{"split": "validation", "threshold": 12000, "documents": 4, "document_rate": 0.014234875444839857, "qa_examples": 14, "qa_example_rate": 0.013930348258706468}
