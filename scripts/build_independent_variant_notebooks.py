@@ -13,8 +13,17 @@ BASE_SETUP_CELL = '''# Simple Kaggle/Colab setup. Run this cell first.
 # Do not force reinstall Kaggle's scientific stack; only install packages if missing.
 import importlib.metadata as importlib_metadata
 import importlib.util
+import json
+import math
+import re
 import subprocess
 import sys
+import time
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from statistics import mean, median
+from typing import Any, Iterable
 
 REQUIRED_PACKAGES = {
     "datasets": "datasets",
@@ -37,7 +46,10 @@ import numpy as np
 import pandas as pd
 import sklearn
 import torch
+from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
+from tqdm.auto import tqdm
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 def version(package_name: str) -> str:
     try:
@@ -59,8 +71,17 @@ LEIDEN_SETUP_CELL = '''# Simple Kaggle/Colab setup. Run this cell first.
 # Do not force reinstall Kaggle's scientific stack; only install packages if missing.
 import importlib.metadata as importlib_metadata
 import importlib.util
+import json
+import math
+import re
 import subprocess
 import sys
+import time
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from statistics import mean, median
+from typing import Any, Iterable
 
 REQUIRED_PACKAGES = {
     "datasets": "datasets",
@@ -85,7 +106,10 @@ import numpy as np
 import pandas as pd
 import sklearn
 import torch
+from datasets import load_dataset
 from sentence_transformers import SentenceTransformer
+from tqdm.auto import tqdm
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 def version(package_name: str) -> str:
     try:
@@ -1335,6 +1359,25 @@ BATCH_RUN_CODE = r'''def selected_records(dataset, *, min_doc_words: int):
             yield record
 
 
+def survey_dataset(dataset) -> dict[str, Any]:
+    total_docs = 0
+    selected_docs = 0
+    selected_questions = 0
+    for record in dataset:
+        total_docs += 1
+        if MIN_DOC_WORDS <= 0 or document_word_count(record) >= MIN_DOC_WORDS:
+            selected_docs += 1
+            selected_questions += len(extract_qa_examples(record))
+    return {
+        "split": SPLIT,
+        "min_doc_words": MIN_DOC_WORDS,
+        "total_docs": total_docs,
+        "selected_docs": selected_docs,
+        "selected_questions": selected_questions,
+        "limit": LIMIT,
+    }
+
+
 def serialize_contexts(contexts: list[Chunk], scores: list[float]) -> list[dict[str, Any]]:
     return [
         {
@@ -1709,6 +1752,25 @@ IMPROVEMENT_BATCH_RUN_CODE = r'''def selected_records(dataset, *, min_doc_words:
     for record in dataset:
         if min_doc_words <= 0 or document_word_count(record) >= min_doc_words:
             yield record
+
+
+def survey_dataset(dataset) -> dict[str, Any]:
+    total_docs = 0
+    selected_docs = 0
+    selected_questions = 0
+    for record in dataset:
+        total_docs += 1
+        if MIN_DOC_WORDS <= 0 or document_word_count(record) >= MIN_DOC_WORDS:
+            selected_docs += 1
+            selected_questions += len(extract_qa_examples(record))
+    return {
+        "split": SPLIT,
+        "min_doc_words": MIN_DOC_WORDS,
+        "total_docs": total_docs,
+        "selected_docs": selected_docs,
+        "selected_questions": selected_questions,
+        "limit": LIMIT,
+    }
 
 
 def serialize_contexts(contexts: list[Chunk], scores: list[float]) -> list[dict[str, Any]]:
