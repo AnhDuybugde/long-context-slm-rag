@@ -5,9 +5,14 @@ from typing import Callable
 from .chunking import Chunk
 from .advanced_variants import (
     DenseRerankerPipeline,
+    RaptorAgglomerativeAbstractivePipeline,
     RaptorExtractivePipeline,
+    RaptorGMMAbstractivePipeline,
     RaptorLeidenAbstractivePipeline,
     SemanticDensePipeline,
+    SemanticHybridRerankerPipeline,
+    SemanticRaptorLeidenRerankerPipeline,
+    SemanticRerankerPipeline,
 )
 from .data import build_document_chunks
 from .generator import SmallSeq2SeqGenerator
@@ -200,6 +205,24 @@ def build_experiment_pipeline(
             max_words=chunk_size,
             top_k=top_k,
         )
+    if variant == "semantic_chunking_reranker":
+        return SemanticRerankerPipeline(
+            retriever_model=retriever_model,
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
+    if variant == "semantic_chunking_hybrid_reranker":
+        return SemanticHybridRerankerPipeline(
+            retriever_model=retriever_model,
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
     if variant == "dense_reranker":
         return DenseRerankerPipeline(
             retriever_model=retriever_model,
@@ -218,12 +241,37 @@ def build_experiment_pipeline(
             overlap=overlap,
             top_k=top_k,
         )
+    if variant == "raptor_gmm_abstractive":
+        return RaptorGMMAbstractivePipeline(
+            retriever_model=retriever_model,
+            generator_model=generator_model,
+            chunk_size=chunk_size,
+            overlap=overlap,
+            top_k=top_k,
+        )
     if variant == "raptor_leiden_abstractive":
         return RaptorLeidenAbstractivePipeline(
             retriever_model=retriever_model,
             generator_model=generator_model,
             chunk_size=chunk_size,
             overlap=overlap,
+            top_k=top_k,
+        )
+    if variant == "raptor_agglomerative_abstractive":
+        return RaptorAgglomerativeAbstractivePipeline(
+            retriever_model=retriever_model,
+            generator_model=generator_model,
+            chunk_size=chunk_size,
+            overlap=overlap,
+            top_k=top_k,
+        )
+    if variant == "semantic_raptor_leiden_reranker":
+        return SemanticRaptorLeidenRerankerPipeline(
+            retriever_model=retriever_model,
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
             top_k=top_k,
         )
     raise ValueError(f"Unknown variant: {variant}")

@@ -35,9 +35,14 @@ running one method at a time without importing repo files:
 - `qasper_dense_recency_heavy_standalone.ipynb`
 - `qasper_hybrid_rrf_standalone.ipynb`
 - `qasper_semantic_chunking_dense_standalone.ipynb`
+- `qasper_semantic_chunking_reranker_standalone.ipynb`
+- `qasper_semantic_chunking_hybrid_reranker_standalone.ipynb`
 - `qasper_dense_reranker_standalone.ipynb`
 - `qasper_raptor_extractive_standalone.ipynb`
+- `qasper_raptor_gmm_abstractive_standalone.ipynb`
 - `qasper_raptor_leiden_abstractive_standalone.ipynb`
+- `qasper_raptor_agglomerative_abstractive_standalone.ipynb`
+- `qasper_semantic_raptor_leiden_reranker_standalone.ipynb`
 
 Use these for fair independent comparisons before choosing which method to
 develop further.

@@ -17,9 +17,14 @@ VARIANTS = [
     "dense_recency_heavy",
     "hybrid_rrf",
     "semantic_chunking_dense",
+    "semantic_chunking_reranker",
+    "semantic_chunking_hybrid_reranker",
     "dense_reranker",
     "raptor_extractive",
+    "raptor_gmm_abstractive",
     "raptor_leiden_abstractive",
+    "raptor_agglomerative_abstractive",
+    "semantic_raptor_leiden_reranker",
 ]
 
 

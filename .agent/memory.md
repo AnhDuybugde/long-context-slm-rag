@@ -421,3 +421,75 @@ Additional prediction-level checks from available `*_predictions.jsonl` files:
 - Local output contains `raptor_extractive_validation_min3000_summary.json`, but no `raptor_extractive_validation_min3000_predictions.jsonl`, so prediction-level stats for `raptor_extractive` were not included in the report.
 
 Current reporting recommendation: present a two-track conclusion. `semantic_chunking_dense` is the metric winner for lexical answer quality, while `dense_reranker` is the more defensible next method for grounded RAG tuning. RAPTOR variants are currently too slow relative to their gains.
+
+## Phase 3 Combined Variant Added On 2026-05-22
+
+Added a follow-up combined method after the independent comparison:
+
+- Variant: `semantic_chunking_reranker`
+- Standalone notebook: `notebooks/independent_variants/qasper_semantic_chunking_reranker_standalone.ipynb`
+- Pipeline: semantic sentence-boundary chunking -> dense retrieval with `retrieve_k=20` -> cross-encoder reranking -> top 5 contexts -> `google/flan-t5-base` generation.
+- Purpose: test whether the high answer F1/relevancy signal from `semantic_chunking_dense` can be combined with the stronger retrieval/context precision signal from `dense_reranker`.
+
+Source wiring added in `src/qasper_base_rag/advanced_variants.py`, `src/qasper_base_rag/experiment_pipelines.py`, `src/qasper_base_rag/evaluate_experiment.py`, and `scripts/build_independent_variant_notebooks.py`.
+
+Verification:
+
+- `python -m py_compile src/qasper_base_rag/advanced_variants.py src/qasper_base_rag/experiment_pipelines.py src/qasper_base_rag/evaluate_experiment.py scripts/build_independent_variant_notebooks.py`: passed.
+- `python -m unittest discover -s tests`: 23 tests passed.
+- New standalone notebook code cells compile after filtering notebook shell-magics.
+
+## Phase 3 Hybrid Reranker Variant Added On 2026-05-22
+
+Added the next follow-up combined method requested by the user:
+
+- Variant: `semantic_chunking_hybrid_reranker`
+- Standalone notebook: `notebooks/independent_variants/qasper_semantic_chunking_hybrid_reranker_standalone.ipynb`
+- Pipeline: semantic sentence-boundary chunking -> dense retrieval + BM25 retrieval -> Reciprocal Rank Fusion candidates -> cross-encoder reranking -> top-k contexts -> `google/flan-t5-base` generation.
+- Tuning knobs exposed in the notebook/config/CLI: `RETRIEVE_K` / `--retrieve-k` and `TOP_K` / `--top-k`.
+- Purpose: test whether the semantic chunking answer-quality signal can be combined with hybrid RRF recall and reranker precision.
+
+Source wiring added in `src/qasper_base_rag/advanced_variants.py`, `src/qasper_base_rag/experiment_pipelines.py`, `src/qasper_base_rag/evaluate_experiment.py`, `scripts/build_independent_variant_notebooks.py`, and `notebooks/README.md`.
+
+Verification:
+
+- `python -m py_compile src/qasper_base_rag/advanced_variants.py src/qasper_base_rag/experiment_pipelines.py src/qasper_base_rag/evaluate_experiment.py scripts/build_independent_variant_notebooks.py`: passed.
+- `python -m unittest discover -s tests`: 24 tests passed.
+- New standalone notebook code cells compile after filtering notebook shell-magics.
+
+## RAPTOR Development Variants Added On 2026-05-22
+
+Added three RAPTOR follow-up variants based on the user's requested research directions:
+
+- `raptor_gmm_abstractive`: original RAPTOR-style fixed leaf chunks -> GMM clustering -> abstractive parent summaries -> collapsed-tree dense retrieval.
+- `raptor_agglomerative_abstractive`: fixed leaf chunks -> position-aware agglomerative clustering -> abstractive parent summaries -> deeper collapsed-tree dense retrieval.
+- `semantic_raptor_leiden_reranker`: semantic leaf chunking -> adaptive-threshold Leiden RAPTOR parent summaries -> collapsed-tree dense retrieval -> cross-encoder reranking.
+
+New standalone notebooks:
+
+- `notebooks/independent_variants/qasper_raptor_gmm_abstractive_standalone.ipynb`
+- `notebooks/independent_variants/qasper_raptor_agglomerative_abstractive_standalone.ipynb`
+- `notebooks/independent_variants/qasper_semantic_raptor_leiden_reranker_standalone.ipynb`
+
+Source wiring added in `src/qasper_base_rag/advanced_variants.py`, `src/qasper_base_rag/experiment_pipelines.py`, `src/qasper_base_rag/evaluate_experiment.py`, `scripts/build_independent_variant_notebooks.py`, `notebooks/README.md`, and `tests/test_advanced_variants.py`.
+
+Verification:
+
+- `python -m py_compile src/qasper_base_rag/advanced_variants.py src/qasper_base_rag/experiment_pipelines.py src/qasper_base_rag/evaluate_experiment.py scripts/build_independent_variant_notebooks.py`: passed.
+- `python -m unittest discover -s tests`: 26 tests passed.
+- The three new standalone notebook code cells compile after filtering notebook shell-magics.
+
+## RAPTOR Paper-Closer Update On 2026-05-22
+
+After web verification against the official RAPTOR GitHub implementation, the Stanford CS224N Laitenberger report, and the Frontiers semantic-chunking/AGC paper, the RAPTOR variants were revised to be closer to the described methods:
+
+- `raptor_gmm_abstractive`: now uses RAPTOR-style UMAP dimensionality reduction when available, BIC-based GMM cluster count selection, soft GMM memberships with threshold `0.10`, global/local clustering, and recursive reclustering for oversized clusters.
+- `raptor_agglomerative_abstractive`: now uses average-linkage agglomerative clustering over cosine distances, appends absolute positional features (start position, distance to end, rough section) scaled to the SBERT-like range and priority-weighted, cuts the hierarchy at approximately `n/3` and `n/6`, and adds a top root summary node.
+- `semantic_raptor_leiden_reranker`: now uses semantic segmentation closer to tau `0.7` via distance threshold `0.30`, adaptive Leiden with kNN graph construction, layer-aware increasing neighbors, layer-aware decreasing resolution, and reranking over collapsed-tree candidates.
+- Evaluation timing now separates indexing/tree-build time from per-question answer/inference time. Source CLI summaries include `total_index_seconds`, `avg_index_seconds_per_doc`, `total_answer_seconds`, and `avg_answer_seconds_per_example`; standalone notebooks include `index_seconds_total`, `index_seconds_per_doc`, `answer_seconds_total`, and `answer_seconds_per_example`, plus per-row `answer_seconds`.
+
+Verification:
+
+- `python -m py_compile src/qasper_base_rag/advanced_variants.py src/qasper_base_rag/trainer.py src/qasper_base_rag/experiment_pipelines.py src/qasper_base_rag/evaluate_experiment.py scripts/build_independent_variant_notebooks.py`: passed.
+- `python -m unittest discover -s tests`: 26 tests passed.
+- The three RAPTOR standalone notebooks compile after regeneration. Runtime smoke initialization could not run locally because `sentence_transformers` is not installed in the local Python environment.

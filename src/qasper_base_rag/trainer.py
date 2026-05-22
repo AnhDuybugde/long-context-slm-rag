@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Protocol
@@ -63,6 +64,9 @@ class EvaluationResult:
 class MetricsAccumulator:
     def __init__(self) -> None:
         self.count = 0
+        self.docs = 0
+        self.index_seconds = 0.0
+        self.answer_seconds = 0.0
         self.token_f1 = 0.0
         self.answer_string_recall_at_k = 0.0
         self.context_precision = 0.0
@@ -79,10 +83,22 @@ class MetricsAccumulator:
         self.faithfulness += result.faithfulness
         self.answer_relevancy += result.answer_relevancy
 
+    def add_index_time(self, seconds: float) -> None:
+        self.docs += 1
+        self.index_seconds += seconds
+
+    def add_answer_time(self, seconds: float) -> None:
+        self.answer_seconds += seconds
+
     def summary(self, *, top_k: int) -> dict[str, float | int]:
         if self.count == 0:
             return {
                 "examples": 0,
+                "docs_indexed": self.docs,
+                "total_index_seconds": self.index_seconds,
+                "avg_index_seconds_per_doc": self.index_seconds / self.docs if self.docs else 0.0,
+                "total_answer_seconds": self.answer_seconds,
+                "avg_answer_seconds_per_example": 0.0,
                 "avg_token_f1": 0.0,
                 f"avg_answer_string_recall_at_{top_k}": 0.0,
                 "avg_context_precision": 0.0,
@@ -92,6 +108,11 @@ class MetricsAccumulator:
             }
         return {
             "examples": self.count,
+            "docs_indexed": self.docs,
+            "total_index_seconds": self.index_seconds,
+            "avg_index_seconds_per_doc": self.index_seconds / self.docs if self.docs else 0.0,
+            "total_answer_seconds": self.answer_seconds,
+            "avg_answer_seconds_per_example": self.answer_seconds / self.count,
             "avg_token_f1": self.token_f1 / self.count,
             f"avg_answer_string_recall_at_{top_k}": self.answer_string_recall_at_k / self.count,
             "avg_context_precision": self.context_precision / self.count,
@@ -128,9 +149,15 @@ class BaseRAGTrainer:
         metrics = MetricsAccumulator()
         with predictions_path.open("w", encoding="utf-8") as file:
             for record in tqdm(dataset, desc="Running base RAG"):
+                index_start = time.perf_counter()
                 self.pipeline.index_document(record)
+                metrics.add_index_time(time.perf_counter() - index_start)
                 for example in extract_qa_examples(record):
+                    answer_start = time.perf_counter()
                     result = self.evaluate_example(example)
+                    answer_seconds = time.perf_counter() - answer_start
+                    metrics.add_answer_time(answer_seconds)
+                    result.metadata["answer_seconds"] = answer_seconds
                     metrics.add(result)
                     file.write(json.dumps(asdict(result), ensure_ascii=False) + "\n")
                     if self.config.limit is not None and metrics.count >= self.config.limit:
