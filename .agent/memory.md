@@ -493,3 +493,34 @@ Verification:
 - `python -m py_compile src/qasper_base_rag/advanced_variants.py src/qasper_base_rag/trainer.py src/qasper_base_rag/experiment_pipelines.py src/qasper_base_rag/evaluate_experiment.py scripts/build_independent_variant_notebooks.py`: passed.
 - `python -m unittest discover -s tests`: 26 tests passed.
 - The three RAPTOR standalone notebooks compile after regeneration. Runtime smoke initialization could not run locally because `sentence_transformers` is not installed in the local Python environment.
+
+## Semantic Reranker Ablation Batch Added On 2026-05-22
+
+Added one standalone batch notebook for hyperparameter-only ablations of `semantic_chunking_reranker`:
+
+- `notebooks/independent_variants/qasper_semantic_chunking_reranker_ablation_batch_standalone.ipynb`
+
+It runs the same architecture sequentially across 11 configs: baseline plus `rk10_tk5`, `rk30_tk5`, `rk50_tk5`, `rk50_tk8`, `thr025`, `thr030`, `thr040`, `chunk160`, `chunk220`, and `min40_thr030`. Each config writes separate prediction/summary files using its variant id, plus a combined batch summary JSON.
+
+Architecturally different variants remain in separate notebooks. This keeps hyperparameter sweeps together while preserving separate files for different method structures.
+
+Verification: the batch notebook compiles, 9 code cells.
+
+## Semantic Reranker Advanced Strategy Notebooks Added On 2026-05-22
+
+Split the broader strategy batch into 10 separate advanced notebooks, one method direction per file:
+
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_minilm_baseline_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_minilm_strict_prompt_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_minilm_extractive_prompt_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_minilm_citation_prompt_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_minilm_neighbor1_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_e5_base_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_e5_base_strict_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_bge_base_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_gte_base_standalone.ipynb`
+- `notebooks/independent_variants/advanced/qasper_sem_rerank_e5_neighbor1_strict_standalone.ipynb`
+
+Each notebook still defines `PrefixedDenseRetriever`, `PromptedSmallSeq2SeqGenerator`, and `SemanticRerankerImprovementPipeline` locally, but now contains only the cases for that direction. Some files include small hyperparameter cases inside the same direction, such as `retrieve_k=30` or `top_k=8`. The old single `qasper_semantic_reranker_improvement_batch_standalone.ipynb` file was removed to avoid confusion.
+
+Verification: all 10 advanced notebooks compile, 9 code cells each.

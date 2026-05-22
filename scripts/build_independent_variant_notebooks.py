@@ -117,6 +117,82 @@ VARIANTS = {
         "title": "Qasper semantic_chunking_reranker Standalone",
         "description": "Semantic sentence-boundary chunking plus dense candidate retrieval followed by a cross-encoder reranker.",
     },
+    "semantic_chunking_reranker_ablation_batch": {
+        "filename": "qasper_semantic_chunking_reranker_ablation_batch_standalone.ipynb",
+        "title": "Qasper semantic_chunking_reranker_ablation_batch Standalone",
+        "description": "Runs a sequential hyperparameter ablation batch for one architecture: semantic chunking plus dense retrieval plus cross-encoder reranking.",
+        "batch": "semantic_chunking_reranker",
+    },
+    "sem_rerank_minilm_baseline": {
+        "filename": "advanced/qasper_sem_rerank_minilm_baseline_standalone.ipynb",
+        "title": "Qasper sem_rerank_minilm_baseline Standalone",
+        "description": "Advanced baseline: semantic chunking plus all-MiniLM dense retrieval plus cross-encoder reranking, with small candidate-count ablations.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "minilm_baseline",
+    },
+    "sem_rerank_minilm_strict_prompt": {
+        "filename": "advanced/qasper_sem_rerank_minilm_strict_prompt_standalone.ipynb",
+        "title": "Qasper sem_rerank_minilm_strict_prompt Standalone",
+        "description": "Prompt-engineered variant that asks the generator to answer strictly from retrieved context or return Unanswerable.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "minilm_strict_prompt",
+    },
+    "sem_rerank_minilm_extractive_prompt": {
+        "filename": "advanced/qasper_sem_rerank_minilm_extractive_prompt_standalone.ipynb",
+        "title": "Qasper sem_rerank_minilm_extractive_prompt Standalone",
+        "description": "Prompt-engineered variant that pushes the generator toward short extractive spans copied from retrieved context.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "minilm_extractive_prompt",
+    },
+    "sem_rerank_minilm_citation_prompt": {
+        "filename": "advanced/qasper_sem_rerank_minilm_citation_prompt_standalone.ipynb",
+        "title": "Qasper sem_rerank_minilm_citation_prompt Standalone",
+        "description": "Prompt-engineered variant that asks the generator to include source markers when possible.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "minilm_citation_prompt",
+    },
+    "sem_rerank_minilm_neighbor1": {
+        "filename": "advanced/qasper_sem_rerank_minilm_neighbor1_standalone.ipynb",
+        "title": "Qasper sem_rerank_minilm_neighbor1 Standalone",
+        "description": "Neighbor-context expansion variant: after reranking, include adjacent semantic chunks to reduce boundary loss.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "minilm_neighbor1",
+    },
+    "sem_rerank_e5_base": {
+        "filename": "advanced/qasper_sem_rerank_e5_base_standalone.ipynb",
+        "title": "Qasper sem_rerank_e5_base Standalone",
+        "description": "Embedding-swap variant using intfloat/e5-base-v2 with query/passsage prefixes.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "e5_base",
+    },
+    "sem_rerank_e5_base_strict": {
+        "filename": "advanced/qasper_sem_rerank_e5_base_strict_standalone.ipynb",
+        "title": "Qasper sem_rerank_e5_base_strict Standalone",
+        "description": "Embedding-swap plus prompt-engineering variant using E5 retrieval and strict grounded answering.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "e5_base_strict",
+    },
+    "sem_rerank_bge_base": {
+        "filename": "advanced/qasper_sem_rerank_bge_base_standalone.ipynb",
+        "title": "Qasper sem_rerank_bge_base Standalone",
+        "description": "Embedding-swap variant using BAAI/bge-base-en-v1.5 with its retrieval query instruction.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "bge_base",
+    },
+    "sem_rerank_gte_base": {
+        "filename": "advanced/qasper_sem_rerank_gte_base_standalone.ipynb",
+        "title": "Qasper sem_rerank_gte_base Standalone",
+        "description": "Embedding-swap variant using thenlper/gte-base for semantic chunk retrieval.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "gte_base",
+    },
+    "sem_rerank_e5_neighbor1_strict": {
+        "filename": "advanced/qasper_sem_rerank_e5_neighbor1_strict_standalone.ipynb",
+        "title": "Qasper sem_rerank_e5_neighbor1_strict Standalone",
+        "description": "Combined advanced variant: E5 retrieval, strict grounded prompt, and neighbor context expansion.",
+        "batch": "semantic_reranker_improvement",
+        "improvement_group": "e5_neighbor1_strict",
+    },
     "semantic_chunking_hybrid_reranker": {
         "filename": "qasper_semantic_chunking_hybrid_reranker_standalone.ipynb",
         "title": "Qasper semantic_chunking_hybrid_reranker Standalone",
@@ -171,6 +247,8 @@ RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RETRIEVER_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GENERATOR_MODEL = "google/flan-t5-base"
 OUTPUT_DIR = "outputs/independent"
+
+{overrides}
 
 CONFIG = {{
     "variant": VARIANT,
@@ -1021,7 +1099,7 @@ def build_pipeline(variant: str):
         return HybridRRFPipeline(retriever_model=RETRIEVER_MODEL, generator_model=GENERATOR_MODEL, chunk_size=CHUNK_SIZE, overlap=OVERLAP, retrieve_k=RETRIEVE_K, top_k=TOP_K)
     if variant == "semantic_chunking_dense":
         return SemanticDensePipeline(retriever_model=RETRIEVER_MODEL, generator_model=GENERATOR_MODEL, min_words=SEMANTIC_MIN_WORDS, max_words=CHUNK_SIZE, breakpoint_threshold=SEMANTIC_BREAKPOINT_THRESHOLD, top_k=TOP_K)
-    if variant == "semantic_chunking_reranker":
+    if variant == "semantic_chunking_reranker" or variant.startswith("semantic_chunking_reranker_"):
         return SemanticRerankerPipeline(retriever_model=RETRIEVER_MODEL, generator_model=GENERATOR_MODEL, reranker_model=RERANKER_MODEL, min_words=SEMANTIC_MIN_WORDS, max_words=CHUNK_SIZE, breakpoint_threshold=SEMANTIC_BREAKPOINT_THRESHOLD, retrieve_k=RETRIEVE_K, top_k=TOP_K)
     if variant == "semantic_chunking_hybrid_reranker":
         return SemanticHybridRerankerPipeline(retriever_model=RETRIEVER_MODEL, generator_model=GENERATOR_MODEL, reranker_model=RERANKER_MODEL, min_words=SEMANTIC_MIN_WORDS, max_words=CHUNK_SIZE, breakpoint_threshold=SEMANTIC_BREAKPOINT_THRESHOLD, retrieve_k=RETRIEVE_K, top_k=TOP_K)
@@ -1157,8 +1235,756 @@ def run_experiment(dataset) -> dict[str, Any]:
 '''
 
 
+SEMANTIC_RERANKER_BATCH_CONFIG = r'''ABLATION_CONFIGS = [
+    {
+        "variant": "semantic_chunking_reranker",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_rk10_tk5",
+        "top_k": 5,
+        "retrieve_k": 10,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_rk30_tk5",
+        "top_k": 5,
+        "retrieve_k": 30,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_rk50_tk5",
+        "top_k": 5,
+        "retrieve_k": 50,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_rk50_tk8",
+        "top_k": 8,
+        "retrieve_k": 50,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_thr025",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.25,
+    },
+    {
+        "variant": "semantic_chunking_reranker_thr030",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.30,
+    },
+    {
+        "variant": "semantic_chunking_reranker_thr040",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.40,
+    },
+    {
+        "variant": "semantic_chunking_reranker_chunk160",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 160,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_chunk220",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 220,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "semantic_chunking_reranker_min40_thr030",
+        "top_k": 5,
+        "retrieve_k": 20,
+        "chunk_size": 180,
+        "semantic_min_words": 40,
+        "semantic_breakpoint_threshold": 0.30,
+    },
+]
+ABLATION_CONFIGS
+'''
+
+
+BATCH_RUN_CODE = r'''def selected_records(dataset, *, min_doc_words: int):
+    for record in dataset:
+        if min_doc_words <= 0 or document_word_count(record) >= min_doc_words:
+            yield record
+
+
+def serialize_contexts(contexts: list[Chunk], scores: list[float]) -> list[dict[str, Any]]:
+    return [
+        {
+            "chunk_id": chunk.chunk_id,
+            "doc_id": chunk.doc_id,
+            "title": chunk.title,
+            "section": chunk.section,
+            "text": chunk.text,
+            "score": score,
+        }
+        for chunk, score in zip(contexts, scores)
+    ]
+
+
+def make_semantic_reranker_pipeline(config: dict[str, Any]) -> SemanticRerankerPipeline:
+    return SemanticRerankerPipeline(
+        retriever_model=RETRIEVER_MODEL,
+        generator_model=GENERATOR_MODEL,
+        reranker_model=RERANKER_MODEL,
+        min_words=config["semantic_min_words"],
+        max_words=config["chunk_size"],
+        breakpoint_threshold=config["semantic_breakpoint_threshold"],
+        retrieve_k=config["retrieve_k"],
+        top_k=config["top_k"],
+    )
+
+
+def make_run_config(config: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "variant": config["variant"],
+        "split": SPLIT,
+        "min_doc_words": MIN_DOC_WORDS,
+        "limit": LIMIT,
+        "top_k": config["top_k"],
+        "retrieve_k": config["retrieve_k"],
+        "chunk_size": config["chunk_size"],
+        "overlap": OVERLAP,
+        "semantic_min_words": config["semantic_min_words"],
+        "semantic_breakpoint_threshold": config["semantic_breakpoint_threshold"],
+        "raptor_group_size": RAPTOR_GROUP_SIZE,
+        "reranker_model": RERANKER_MODEL,
+        "retriever_model": RETRIEVER_MODEL,
+        "generator_model": GENERATOR_MODEL,
+    }
+
+
+def run_one_ablation(dataset_records: list[dict[str, Any]], config: dict[str, Any]) -> dict[str, Any]:
+    output_dir = Path(OUTPUT_DIR)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    variant = config["variant"]
+    top_k = config["top_k"]
+    predictions_path = output_dir / f"{variant}_{SPLIT}_min{MIN_DOC_WORDS}_predictions.jsonl"
+    summary_path = output_dir / f"{variant}_{SPLIT}_min{MIN_DOC_WORDS}_summary.json"
+
+    pipeline = make_semantic_reranker_pipeline(config)
+    totals = Counter()
+    rows = 0
+    docs_seen = 0
+    index_seconds_total = 0.0
+    answer_seconds_total = 0.0
+    start = time.perf_counter()
+
+    def write_summary() -> dict[str, Any]:
+        runtime = time.perf_counter() - start
+        metrics = {"examples": rows, **{f"avg_{key}": value / rows for key, value in totals.items()}} if rows else {"examples": 0}
+        summary = {
+            "variant": variant,
+            "split": SPLIT,
+            "min_doc_words": MIN_DOC_WORDS,
+            "docs_seen": docs_seen,
+            "runtime_seconds": runtime,
+            "seconds_per_example": runtime / rows if rows else 0.0,
+            "index_seconds_total": index_seconds_total,
+            "index_seconds_per_doc": index_seconds_total / docs_seen if docs_seen else 0.0,
+            "answer_seconds_total": answer_seconds_total,
+            "answer_seconds_per_example": answer_seconds_total / rows if rows else 0.0,
+            "config": make_run_config(config),
+            "metrics": metrics,
+            "predictions_path": str(predictions_path),
+        }
+        summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        return summary
+
+    with predictions_path.open("w", encoding="utf-8") as file:
+        for record in tqdm(dataset_records, desc=f"Running {variant}"):
+            docs_seen += 1
+            index_start = time.perf_counter()
+            pipeline.index_document(record)
+            index_seconds_total += time.perf_counter() - index_start
+            for example in extract_qa_examples(record):
+                answer_start = time.perf_counter()
+                answer_result = pipeline.answer(example.question)
+                answer_seconds = time.perf_counter() - answer_start
+                answer_seconds_total += answer_seconds
+                contexts = answer_result["contexts"]
+                scores = answer_result["scores"]
+                prediction = answer_result["answer"]
+                extra = {key: value for key, value in answer_result.items() if key not in {"answer", "contexts", "scores"}}
+                row_metrics = {
+                    "token_f1": best_f1(prediction, example.gold_answers),
+                    f"answer_string_recall_at_{top_k}": answer_string_recall(contexts, example.gold_answers),
+                    "context_precision": context_precision(contexts, example.gold_answers, example.evidence),
+                    "context_recall": context_recall(contexts, example.gold_answers, example.evidence),
+                    "faithfulness": faithfulness(prediction, contexts),
+                    "answer_relevancy": answer_relevancy(prediction, example.question, example.gold_answers),
+                }
+                row = {
+                    "doc_id": example.doc_id,
+                    "question_id": example.question_id,
+                    "title": example.title,
+                    "question": example.question,
+                    "prediction": prediction,
+                    "gold_answers": example.gold_answers,
+                    "evidence": example.evidence,
+                    "metrics": row_metrics,
+                    "contexts": serialize_contexts(contexts, scores),
+                    "answer_seconds": answer_seconds,
+                    **extra,
+                }
+                file.write(json.dumps(row, ensure_ascii=False) + "\n")
+                totals.update(row_metrics)
+                rows += 1
+                if LIMIT is not None and rows >= LIMIT:
+                    return write_summary()
+
+    return write_summary()
+
+
+def run_experiment(dataset) -> list[dict[str, Any]]:
+    records = list(selected_records(dataset, min_doc_words=MIN_DOC_WORDS))
+    summaries = []
+    for config in ABLATION_CONFIGS:
+        summaries.append(run_one_ablation(records, config))
+    combined_path = Path(OUTPUT_DIR) / f"semantic_chunking_reranker_ablation_batch_{SPLIT}_min{MIN_DOC_WORDS}_summary.json"
+    combined_path.parent.mkdir(parents=True, exist_ok=True)
+    combined_path.write_text(json.dumps(summaries, ensure_ascii=False, indent=2), encoding="utf-8")
+    return summaries
+'''
+
+
+IMPROVEMENT_BATCH_CONFIG = r'''IMPROVEMENT_CONFIGS = [
+    {
+        "variant": "sem_rerank_minilm_baseline",
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "default",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_minilm_strict_prompt",
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "strict",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_minilm_extractive_prompt",
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "extractive",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_minilm_citation_prompt",
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "citation",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_minilm_neighbor1",
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "default",
+        "neighbor_window": 1,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "max_contexts": 8,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_e5_base",
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+        "prompt_mode": "default",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_e5_base_strict",
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+        "prompt_mode": "strict",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_bge_base",
+        "retriever_model": "BAAI/bge-base-en-v1.5",
+        "query_prefix": "Represent this sentence for searching relevant passages: ",
+        "passage_prefix": "",
+        "prompt_mode": "default",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_gte_base",
+        "retriever_model": "thenlper/gte-base",
+        "query_prefix": "",
+        "passage_prefix": "",
+        "prompt_mode": "default",
+        "neighbor_window": 0,
+        "retrieve_k": 20,
+        "top_k": 5,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+    {
+        "variant": "sem_rerank_e5_neighbor1_strict",
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+        "prompt_mode": "strict",
+        "neighbor_window": 1,
+        "retrieve_k": 30,
+        "top_k": 5,
+        "max_contexts": 8,
+        "chunk_size": 180,
+        "semantic_min_words": 60,
+        "semantic_breakpoint_threshold": 0.35,
+    },
+]
+IMPROVEMENT_CONFIGS
+'''
+
+
+def improvement_config(
+    variant: str,
+    *,
+    retriever_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+    query_prefix: str = "",
+    passage_prefix: str = "",
+    prompt_mode: str = "default",
+    neighbor_window: int = 0,
+    retrieve_k: int = 20,
+    top_k: int = 5,
+    max_contexts: int | None = None,
+    chunk_size: int = 180,
+    semantic_min_words: int = 60,
+    semantic_breakpoint_threshold: float = 0.35,
+) -> dict[str, object]:
+    config: dict[str, object] = {
+        "variant": variant,
+        "retriever_model": retriever_model,
+        "query_prefix": query_prefix,
+        "passage_prefix": passage_prefix,
+        "prompt_mode": prompt_mode,
+        "neighbor_window": neighbor_window,
+        "retrieve_k": retrieve_k,
+        "top_k": top_k,
+        "chunk_size": chunk_size,
+        "semantic_min_words": semantic_min_words,
+        "semantic_breakpoint_threshold": semantic_breakpoint_threshold,
+    }
+    if max_contexts is not None:
+        config["max_contexts"] = max_contexts
+    return config
+
+
+IMPROVEMENT_CONFIG_GROUPS: dict[str, list[dict[str, object]]] = {
+    "minilm_baseline": [
+        improvement_config("sem_rerank_minilm_baseline"),
+        improvement_config("sem_rerank_minilm_baseline_rk30", retrieve_k=30),
+        improvement_config("sem_rerank_minilm_baseline_tk8", retrieve_k=30, top_k=8),
+    ],
+    "minilm_strict_prompt": [
+        improvement_config("sem_rerank_minilm_strict_prompt", prompt_mode="strict"),
+        improvement_config("sem_rerank_minilm_strict_prompt_rk30", prompt_mode="strict", retrieve_k=30),
+    ],
+    "minilm_extractive_prompt": [
+        improvement_config("sem_rerank_minilm_extractive_prompt", prompt_mode="extractive"),
+        improvement_config("sem_rerank_minilm_extractive_prompt_rk30", prompt_mode="extractive", retrieve_k=30),
+    ],
+    "minilm_citation_prompt": [
+        improvement_config("sem_rerank_minilm_citation_prompt", prompt_mode="citation"),
+        improvement_config("sem_rerank_minilm_citation_prompt_tk8", prompt_mode="citation", retrieve_k=30, top_k=8),
+    ],
+    "minilm_neighbor1": [
+        improvement_config("sem_rerank_minilm_neighbor1", neighbor_window=1, max_contexts=8),
+        improvement_config("sem_rerank_minilm_neighbor1_rk30", neighbor_window=1, retrieve_k=30, max_contexts=8),
+    ],
+    "e5_base": [
+        improvement_config("sem_rerank_e5_base", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: "),
+        improvement_config("sem_rerank_e5_base_rk30", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", retrieve_k=30),
+        improvement_config("sem_rerank_e5_base_tk8", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", retrieve_k=30, top_k=8),
+    ],
+    "e5_base_strict": [
+        improvement_config("sem_rerank_e5_base_strict", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", prompt_mode="strict"),
+        improvement_config("sem_rerank_e5_base_strict_rk30", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", prompt_mode="strict", retrieve_k=30),
+    ],
+    "bge_base": [
+        improvement_config("sem_rerank_bge_base", retriever_model="BAAI/bge-base-en-v1.5", query_prefix="Represent this sentence for searching relevant passages: "),
+        improvement_config("sem_rerank_bge_base_rk30", retriever_model="BAAI/bge-base-en-v1.5", query_prefix="Represent this sentence for searching relevant passages: ", retrieve_k=30),
+    ],
+    "gte_base": [
+        improvement_config("sem_rerank_gte_base", retriever_model="thenlper/gte-base"),
+        improvement_config("sem_rerank_gte_base_rk30", retriever_model="thenlper/gte-base", retrieve_k=30),
+    ],
+    "e5_neighbor1_strict": [
+        improvement_config("sem_rerank_e5_neighbor1_strict", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", prompt_mode="strict", neighbor_window=1, retrieve_k=30, max_contexts=8),
+        improvement_config("sem_rerank_e5_neighbor1_strict_tk8", retriever_model="intfloat/e5-base-v2", query_prefix="query: ", passage_prefix="passage: ", prompt_mode="strict", neighbor_window=1, retrieve_k=40, top_k=8, max_contexts=10),
+    ],
+}
+
+
+def improvement_config_cell(meta: dict[str, object]) -> str:
+    group = str(meta.get("improvement_group", ""))
+    configs = IMPROVEMENT_CONFIG_GROUPS.get(group)
+    if not configs:
+        return 'IMPROVEMENT_BATCH_NAME = "semantic_reranker_improvement_batch"\n' + IMPROVEMENT_BATCH_CONFIG
+    return (
+        f'IMPROVEMENT_BATCH_NAME = "{group}"\n'
+        + "IMPROVEMENT_CONFIGS = "
+        + json.dumps(configs, ensure_ascii=False, indent=4)
+        + "\nIMPROVEMENT_CONFIGS\n"
+    )
+
+
+IMPROVEMENT_BATCH_RUN_CODE = r'''def selected_records(dataset, *, min_doc_words: int):
+    for record in dataset:
+        if min_doc_words <= 0 or document_word_count(record) >= min_doc_words:
+            yield record
+
+
+def serialize_contexts(contexts: list[Chunk], scores: list[float]) -> list[dict[str, Any]]:
+    return [
+        {
+            "chunk_id": chunk.chunk_id,
+            "doc_id": chunk.doc_id,
+            "title": chunk.title,
+            "section": chunk.section,
+            "text": chunk.text,
+            "score": score,
+        }
+        for chunk, score in zip(contexts, scores)
+    ]
+
+
+class PrefixedDenseRetriever:
+    def __init__(self, model_name: str, *, query_prefix: str = "", passage_prefix: str = "") -> None:
+        self.model_name = model_name
+        self.query_prefix = query_prefix
+        self.passage_prefix = passage_prefix
+        self.model = SentenceTransformer(model_name)
+        self.chunks: list[Chunk] = []
+        self.embeddings = None
+
+    def index(self, chunks: list[Chunk]) -> None:
+        self.chunks = chunks
+        texts = [self.passage_prefix + chunk.text for chunk in chunks]
+        self.embeddings = self.model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+
+    def search(self, query: str, *, top_k: int = 5) -> list[tuple[Chunk, float]]:
+        if self.embeddings is None:
+            raise RuntimeError("Call index() before search().")
+        query_embedding = self.model.encode([self.query_prefix + query], normalize_embeddings=True, show_progress_bar=False)[0]
+        scores = np.matmul(self.embeddings, query_embedding)
+        top_indices = np.argsort(scores)[::-1][:top_k]
+        return [(self.chunks[index], float(scores[index])) for index in top_indices]
+
+
+class PromptedSmallSeq2SeqGenerator:
+    def __init__(self, model_name: str, *, prompt_mode: str = "default") -> None:
+        from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
+        self.prompt_mode = prompt_mode
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model.to(self.device)
+        self.model.eval()
+
+    def answer(self, question: str, contexts: list[Chunk], *, max_input_tokens: int = 1024, max_new_tokens: int = 96) -> str:
+        context_text = "\n\n".join(
+            f"[{index + 1}] Title: {chunk.title}\nSection: {chunk.section}\n{chunk.text}"
+            for index, chunk in enumerate(contexts)
+        )
+        if self.prompt_mode == "strict":
+            instruction = (
+                "Answer using only the provided context. Prefer short exact phrases from the context. "
+                "If the context does not directly answer the question, answer Unanswerable. Do not explain."
+            )
+        elif self.prompt_mode == "extractive":
+            instruction = (
+                "Answer using the shortest exact span or phrase copied from the context. "
+                "If no exact answer span is present, answer Unanswerable."
+            )
+        elif self.prompt_mode == "citation":
+            instruction = (
+                "Answer using only the provided context and include source markers like [1] or [2] when possible. "
+                "If the answer is not in the context, answer Unanswerable."
+            )
+        else:
+            instruction = "Answer the question using only the provided context. If the answer is not in the context, answer Unanswerable."
+        prompt = f"{instruction}\n\nContext:\n{context_text}\n\nQuestion: {question}\nAnswer:"
+        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=max_input_tokens).to(self.device)
+        with torch.inference_mode():
+            outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens, num_beams=1)
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+
+
+class SemanticRerankerImprovementPipeline:
+    def __init__(self, config: dict[str, Any]) -> None:
+        self.config = config
+        self.retriever = PrefixedDenseRetriever(
+            config["retriever_model"],
+            query_prefix=config.get("query_prefix", ""),
+            passage_prefix=config.get("passage_prefix", ""),
+        )
+        self.reranker = CrossEncoderReranker(RERANKER_MODEL)
+        self.generator = PromptedSmallSeq2SeqGenerator(GENERATOR_MODEL, prompt_mode=config.get("prompt_mode", "default"))
+        self.chunker = SemanticChunker(
+            SemanticChunkingConfig(
+                min_words=config["semantic_min_words"],
+                max_words=config["chunk_size"],
+                breakpoint_threshold=config["semantic_breakpoint_threshold"],
+            ),
+            embedder=self.retriever.model,
+        )
+        self.retrieve_k = config["retrieve_k"]
+        self.top_k = config["top_k"]
+        self.neighbor_window = config.get("neighbor_window", 0)
+        self.max_contexts = config.get("max_contexts", self.top_k)
+        self.ordered_chunks: list[Chunk] = []
+        self.chunk_position: dict[str, int] = {}
+
+    def index_document(self, record: dict[str, Any]) -> None:
+        self.ordered_chunks = build_semantic_document_chunks(record, chunker=self.chunker)
+        self.chunk_position = {chunk.chunk_id: index for index, chunk in enumerate(self.ordered_chunks)}
+        self.retriever.index(self.ordered_chunks)
+
+    def _expand_neighbors(self, reranked: list[tuple[Chunk, float]]) -> list[tuple[Chunk, float]]:
+        if self.neighbor_window <= 0:
+            return reranked
+        expanded: list[tuple[Chunk, float]] = []
+        seen: set[str] = set()
+        score_by_id = {chunk.chunk_id: score for chunk, score in reranked}
+        for chunk, score in reranked:
+            position = self.chunk_position.get(chunk.chunk_id)
+            if position is None:
+                continue
+            for index in range(max(0, position - self.neighbor_window), min(len(self.ordered_chunks), position + self.neighbor_window + 1)):
+                candidate = self.ordered_chunks[index]
+                if candidate.chunk_id in seen:
+                    continue
+                seen.add(candidate.chunk_id)
+                expanded.append((candidate, score_by_id.get(candidate.chunk_id, score * 0.95)))
+                if len(expanded) >= self.max_contexts:
+                    return expanded
+        return expanded
+
+    def answer(self, question: str) -> dict[str, Any]:
+        candidates = self.retriever.search(question, top_k=self.retrieve_k)
+        reranked = self.reranker.rerank(question, candidates, top_k=self.top_k)
+        final_contexts = self._expand_neighbors(reranked)
+        contexts = [chunk for chunk, _score in final_contexts]
+        return {
+            "answer": self.generator.answer(question, contexts),
+            "contexts": contexts,
+            "scores": [score for _chunk, score in final_contexts],
+            "retriever_model": self.config["retriever_model"],
+            "query_prefix": self.config.get("query_prefix", ""),
+            "passage_prefix": self.config.get("passage_prefix", ""),
+            "prompt_mode": self.config.get("prompt_mode", "default"),
+            "neighbor_window": self.neighbor_window,
+            "reranker_model": self.reranker.model_name,
+            "reranker_load_error": self.reranker.load_error,
+        }
+
+
+def make_run_config(config: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "variant": config["variant"],
+        "split": SPLIT,
+        "min_doc_words": MIN_DOC_WORDS,
+        "limit": LIMIT,
+        "top_k": config["top_k"],
+        "retrieve_k": config["retrieve_k"],
+        "chunk_size": config["chunk_size"],
+        "overlap": OVERLAP,
+        "semantic_min_words": config["semantic_min_words"],
+        "semantic_breakpoint_threshold": config["semantic_breakpoint_threshold"],
+        "prompt_mode": config.get("prompt_mode", "default"),
+        "neighbor_window": config.get("neighbor_window", 0),
+        "query_prefix": config.get("query_prefix", ""),
+        "passage_prefix": config.get("passage_prefix", ""),
+        "reranker_model": RERANKER_MODEL,
+        "retriever_model": config["retriever_model"],
+        "generator_model": GENERATOR_MODEL,
+    }
+
+
+def run_one_improvement(dataset_records: list[dict[str, Any]], config: dict[str, Any]) -> dict[str, Any]:
+    output_dir = Path(OUTPUT_DIR)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    variant = config["variant"]
+    top_k = config["top_k"]
+    predictions_path = output_dir / f"{variant}_{SPLIT}_min{MIN_DOC_WORDS}_predictions.jsonl"
+    summary_path = output_dir / f"{variant}_{SPLIT}_min{MIN_DOC_WORDS}_summary.json"
+
+    pipeline = SemanticRerankerImprovementPipeline(config)
+    totals = Counter()
+    rows = 0
+    docs_seen = 0
+    index_seconds_total = 0.0
+    answer_seconds_total = 0.0
+    start = time.perf_counter()
+
+    def write_summary() -> dict[str, Any]:
+        runtime = time.perf_counter() - start
+        metrics = {"examples": rows, **{f"avg_{key}": value / rows for key, value in totals.items()}} if rows else {"examples": 0}
+        summary = {
+            "variant": variant,
+            "split": SPLIT,
+            "min_doc_words": MIN_DOC_WORDS,
+            "docs_seen": docs_seen,
+            "runtime_seconds": runtime,
+            "seconds_per_example": runtime / rows if rows else 0.0,
+            "index_seconds_total": index_seconds_total,
+            "index_seconds_per_doc": index_seconds_total / docs_seen if docs_seen else 0.0,
+            "answer_seconds_total": answer_seconds_total,
+            "answer_seconds_per_example": answer_seconds_total / rows if rows else 0.0,
+            "config": make_run_config(config),
+            "metrics": metrics,
+            "predictions_path": str(predictions_path),
+        }
+        summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        return summary
+
+    with predictions_path.open("w", encoding="utf-8") as file:
+        for record in tqdm(dataset_records, desc=f"Running {variant}"):
+            docs_seen += 1
+            index_start = time.perf_counter()
+            pipeline.index_document(record)
+            index_seconds_total += time.perf_counter() - index_start
+            for example in extract_qa_examples(record):
+                answer_start = time.perf_counter()
+                answer_result = pipeline.answer(example.question)
+                answer_seconds = time.perf_counter() - answer_start
+                answer_seconds_total += answer_seconds
+                contexts = answer_result["contexts"]
+                scores = answer_result["scores"]
+                prediction = answer_result["answer"]
+                extra = {key: value for key, value in answer_result.items() if key not in {"answer", "contexts", "scores"}}
+                row_metrics = {
+                    "token_f1": best_f1(prediction, example.gold_answers),
+                    f"answer_string_recall_at_{top_k}": answer_string_recall(contexts, example.gold_answers),
+                    "context_precision": context_precision(contexts, example.gold_answers, example.evidence),
+                    "context_recall": context_recall(contexts, example.gold_answers, example.evidence),
+                    "faithfulness": faithfulness(prediction, contexts),
+                    "answer_relevancy": answer_relevancy(prediction, example.question, example.gold_answers),
+                }
+                row = {
+                    "doc_id": example.doc_id,
+                    "question_id": example.question_id,
+                    "title": example.title,
+                    "question": example.question,
+                    "prediction": prediction,
+                    "gold_answers": example.gold_answers,
+                    "evidence": example.evidence,
+                    "metrics": row_metrics,
+                    "contexts": serialize_contexts(contexts, scores),
+                    "answer_seconds": answer_seconds,
+                    **extra,
+                }
+                file.write(json.dumps(row, ensure_ascii=False) + "\n")
+                totals.update(row_metrics)
+                rows += 1
+                if LIMIT is not None and rows >= LIMIT:
+                    return write_summary()
+
+    return write_summary()
+
+
+def run_experiment(dataset) -> list[dict[str, Any]]:
+    records = list(selected_records(dataset, min_doc_words=MIN_DOC_WORDS))
+    summaries = []
+    for config in IMPROVEMENT_CONFIGS:
+        summaries.append(run_one_improvement(records, config))
+    combined_path = Path(OUTPUT_DIR) / f"{IMPROVEMENT_BATCH_NAME}_{SPLIT}_min{MIN_DOC_WORDS}_summary.json"
+    combined_path.parent.mkdir(parents=True, exist_ok=True)
+    combined_path.write_text(json.dumps(summaries, ensure_ascii=False, indent=2), encoding="utf-8")
+    return summaries
+'''
+
+
 def source_lines(text: str) -> list[str]:
     return text.splitlines(keepends=True)
+
+
+def format_config_overrides(meta: dict[str, str]) -> str:
+    overrides = meta.get("overrides", {})
+    if not overrides:
+        return "# No ablation overrides."
+    lines = ["# Ablation overrides for this standalone variant."]
+    for key, value in overrides.items():
+        lines.append(f"{key} = {json.dumps(value)}")
+    return "\n".join(lines)
 
 
 def build_notebook(base: dict, *, variant: str, meta: dict[str, str]) -> dict:
@@ -1170,9 +1996,19 @@ def build_notebook(base: dict, *, variant: str, meta: dict[str, str]) -> dict:
         "It does not clone the repo and does not import from `src/`. "
         "By default it only runs papers with `MIN_DOC_WORDS >= 3000` to focus on long-context cases.\n"
     )
-    notebook["cells"][2]["source"] = source_lines(CONFIG_TEMPLATE.format(variant=variant))
+    notebook["cells"][2]["source"] = source_lines(
+        CONFIG_TEMPLATE.format(variant=variant, overrides=format_config_overrides(meta))
+    )
     notebook["cells"][7]["source"] = source_lines(PIPELINES_CODE)
     notebook["cells"][8]["source"] = source_lines(RUN_CODE)
+    if meta.get("batch") == "semantic_chunking_reranker":
+        notebook["cells"][2]["source"] = source_lines(CONFIG_TEMPLATE.format(variant=variant, overrides="# Batch config is defined in the ablation cell."))
+        notebook["cells"][3]["source"] = source_lines(SEMANTIC_RERANKER_BATCH_CONFIG)
+        notebook["cells"][8]["source"] = source_lines(BATCH_RUN_CODE)
+    if meta.get("batch") == "semantic_reranker_improvement":
+        notebook["cells"][2]["source"] = source_lines(CONFIG_TEMPLATE.format(variant=variant, overrides="# Improvement configs for this strategy are defined in the next cell."))
+        notebook["cells"][3]["source"] = source_lines(improvement_config_cell(meta))
+        notebook["cells"][8]["source"] = source_lines(IMPROVEMENT_BATCH_RUN_CODE)
     if variant in {"raptor_leiden_abstractive", "semantic_raptor_leiden_reranker"}:
         notebook["cells"][1]["source"] = source_lines(LEIDEN_SETUP_CELL)
     else:
@@ -1189,6 +2025,7 @@ def main() -> None:
     for variant, meta in VARIANTS.items():
         notebook = build_notebook(base, variant=variant, meta=meta)
         output_path = OUTPUT_DIR / meta["filename"]
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(json.dumps(notebook, ensure_ascii=False, indent=2), encoding="utf-8")
         print(output_path)
 

@@ -36,6 +36,17 @@ running one method at a time without importing repo files:
 - `qasper_hybrid_rrf_standalone.ipynb`
 - `qasper_semantic_chunking_dense_standalone.ipynb`
 - `qasper_semantic_chunking_reranker_standalone.ipynb`
+- `qasper_semantic_chunking_reranker_ablation_batch_standalone.ipynb`
+- `advanced/qasper_sem_rerank_minilm_baseline_standalone.ipynb`
+- `advanced/qasper_sem_rerank_minilm_strict_prompt_standalone.ipynb`
+- `advanced/qasper_sem_rerank_minilm_extractive_prompt_standalone.ipynb`
+- `advanced/qasper_sem_rerank_minilm_citation_prompt_standalone.ipynb`
+- `advanced/qasper_sem_rerank_minilm_neighbor1_standalone.ipynb`
+- `advanced/qasper_sem_rerank_e5_base_standalone.ipynb`
+- `advanced/qasper_sem_rerank_e5_base_strict_standalone.ipynb`
+- `advanced/qasper_sem_rerank_bge_base_standalone.ipynb`
+- `advanced/qasper_sem_rerank_gte_base_standalone.ipynb`
+- `advanced/qasper_sem_rerank_e5_neighbor1_strict_standalone.ipynb`
 - `qasper_semantic_chunking_hybrid_reranker_standalone.ipynb`
 - `qasper_dense_reranker_standalone.ipynb`
 - `qasper_raptor_extractive_standalone.ipynb`
