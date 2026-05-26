@@ -29,6 +29,23 @@ class FakePipeline:
         }
 
 
+class FakeExampleAwarePipeline(FakePipeline):
+    def answer_example(self, example):
+        chunk = Chunk(
+            chunk_id=f"{example.doc_id}::oracle",
+            doc_id=example.doc_id,
+            title=example.title,
+            section="oracle_gold_evidence",
+            text=example.evidence[0],
+        )
+        return {
+            "answer": "Oracle answer.",
+            "contexts": [chunk],
+            "scores": [1.0],
+            "oracle_context_source": "gold_evidence",
+        }
+
+
 class BaseRAGTrainerTest(unittest.TestCase):
     def test_run_writes_predictions_and_summary(self):
         record = {
@@ -69,6 +86,8 @@ class BaseRAGTrainerTest(unittest.TestCase):
             result = BaseRAGTrainer(config, pipeline=FakePipeline()).run([record])
 
             self.assertEqual(result["metrics"]["examples"], 1)
+            self.assertEqual(result["metrics"]["coverage"], 1.0)
+            self.assertEqual(result["metrics"]["abstain_rate"], 0.0)
             self.assertTrue(predictions.exists())
             self.assertTrue(summary.exists())
 
@@ -117,6 +136,48 @@ class BaseRAGTrainerTest(unittest.TestCase):
             result = BaseRAGTrainer(config, pipeline=FakePipeline()).run(records)
 
             self.assertEqual(result["metrics"]["examples"], 2)
+
+    def test_pipeline_can_answer_with_full_example_hook(self):
+        record = {
+            "id": "doc-1",
+            "title": "A Paper",
+            "abstract": "The system uses a dense retriever.",
+            "full_text": {"section_name": [], "paragraphs": []},
+            "qas": {
+                "question": ["What is the oracle answer?"],
+                "question_id": ["q1"],
+                "answers": [
+                    {
+                        "answer": [
+                            {
+                                "free_form_answer": "Oracle answer.",
+                                "evidence": ["Oracle evidence."],
+                                "unanswerable": False,
+                                "extractive_spans": [],
+                                "yes_no": None,
+                            }
+                        ],
+                        "annotation_id": ["a1"],
+                        "worker_id": ["w1"],
+                    }
+                ],
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            predictions = Path(tmpdir) / "predictions.jsonl"
+            summary = Path(tmpdir) / "summary.json"
+            config = BaseRAGConfig(
+                limit=1,
+                output_predictions=str(predictions),
+                output_summary=str(summary),
+            )
+
+            BaseRAGTrainer(config, pipeline=FakeExampleAwarePipeline()).run([record])
+
+            prediction_row = json.loads(predictions.read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(prediction_row["prediction"], "Oracle answer.")
+            self.assertEqual(prediction_row["metadata"]["oracle_context_source"], "gold_evidence")
 
 
 if __name__ == "__main__":

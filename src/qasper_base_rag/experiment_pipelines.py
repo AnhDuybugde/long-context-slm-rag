@@ -4,7 +4,13 @@ from typing import Callable
 
 from .chunking import Chunk
 from .advanced_variants import (
+    ContextualSemanticRerankerPipeline,
     DenseRerankerPipeline,
+    E5QwenFilterGeneratorPipeline,
+    GraphRagRaptorWideLateChunkingPipeline,
+    GraphRagRaptorSentenceSelectWideLateChunkingPipeline,
+    OracleGoldContextPromptAblationPipeline,
+    OracleGoldContextPipeline,
     RaptorAgglomerativeAbstractivePipeline,
     RaptorExtractivePipeline,
     RaptorGMMAbstractivePipeline,
@@ -13,6 +19,10 @@ from .advanced_variants import (
     SemanticHybridRerankerPipeline,
     SemanticRaptorLeidenRerankerPipeline,
     SemanticRerankerPipeline,
+    SemanticRerankerQwenDirectPipeline,
+    SentenceSelectWideLateChunkingPipeline,
+    SelfRouteSemanticRerankerPipeline,
+    WideLateChunkingSemanticRerankerPipeline,
 )
 from .data import build_document_chunks
 from .generator import SmallSeq2SeqGenerator
@@ -32,6 +42,87 @@ REORDERERS: dict[str, ReorderFn] = {
     "score": score_order,
     "u_shape": u_shaped_reorder,
     "recency_heavy": recency_heavy_reorder,
+}
+
+ORACLE_GENERATOR_BOOST_CONFIGS: dict[str, dict] = {
+    "oracle_gold_context_flan_base_generator_boost": {
+        "prompt_mode": "direct",
+        "context_order": "u_tail",
+        "tail_reminder": True,
+        "num_beams": 4,
+    },
+}
+
+WIDE_LATE_CHUNKING_CONFIGS: dict[str, dict] = {
+    "sem_rerank_minilm_wide_latechunk": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
+}
+
+GRAPH_RAPTOR_WIDE_LATE_CHUNKING_CONFIGS: dict[str, dict] = {
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
+}
+
+SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS: dict[str, dict] = {
+    "sem_rerank_minilm_wide_latechunk_sentence_select": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk_sentence_select": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
+    "sem_rerank_minilm_wide_latechunk_high_recall_compress": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk_high_recall_compress": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
+}
+
+GRAPH_RAPTOR_SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS: dict[str, dict] = {
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor_sentence_select": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor_sentence_select": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor_high_recall_compress": {
+        "retriever_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "query_prefix": "",
+        "passage_prefix": "",
+    },
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor_high_recall_compress": {
+        "retriever_model": "intfloat/e5-base-v2",
+        "query_prefix": "query: ",
+        "passage_prefix": "passage: ",
+    },
 }
 
 
@@ -223,6 +314,110 @@ def build_experiment_pipeline(
             retrieve_k=retrieve_k,
             top_k=top_k,
         )
+    if variant in WIDE_LATE_CHUNKING_CONFIGS:
+        return WideLateChunkingSemanticRerankerPipeline(
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            min_words=120,
+            max_words=420,
+            breakpoint_threshold=0.45,
+            overlap_sentences=2,
+            retrieve_k=30,
+            top_k=top_k,
+            prompt_mode="direct",
+            context_order="u_tail",
+            tail_reminder=True,
+            max_input_tokens=4096,
+            **WIDE_LATE_CHUNKING_CONFIGS[variant],
+        )
+    if variant in GRAPH_RAPTOR_WIDE_LATE_CHUNKING_CONFIGS:
+        return GraphRagRaptorWideLateChunkingPipeline(
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            min_words=120,
+            max_words=420,
+            breakpoint_threshold=0.45,
+            overlap_sentences=2,
+            retrieve_k=30,
+            top_k=top_k,
+            prompt_mode="direct",
+            context_order="u_tail",
+            tail_reminder=True,
+            max_input_tokens=4096,
+            graph_tree_mode="local_tree",
+            graph_cluster_backend="leiden",
+            graph_fallback_backend="agglomerative",
+            graph_max_levels=2,
+            graph_branch_k=3,
+            graph_parent_top_k=6,
+            graph_child_candidate_k=24,
+            graph_similarity_threshold=0.70,
+            graph_include_parent_context=True,
+            graph_summary_mode="extractive_first",
+            **GRAPH_RAPTOR_WIDE_LATE_CHUNKING_CONFIGS[variant],
+        )
+    if variant in SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS:
+        high_recall_compress = variant.endswith("_high_recall_compress")
+        return SentenceSelectWideLateChunkingPipeline(
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            min_words=120,
+            max_words=420,
+            breakpoint_threshold=0.45,
+            overlap_sentences=2,
+            retrieve_k=30,
+            top_k=top_k,
+            prompt_mode="extractive",
+            context_order="u_tail",
+            tail_reminder=True,
+            max_input_tokens=4096,
+            sentence_max_sentences=8,
+            sentence_window=1,
+            sentence_min_query_coverage=0.25,
+            sentence_min_best_score=0.20,
+            sentence_abstain_on_low_support=True,
+            sentence_high_recall=high_recall_compress,
+            sentence_high_recall_max_sentences=12,
+            sentence_high_recall_complex_max_sentences=16,
+            sentence_max_per_context=3,
+            **SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS[variant],
+        )
+    if variant in GRAPH_RAPTOR_SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS:
+        high_recall_compress = variant.endswith("_high_recall_compress")
+        return GraphRagRaptorSentenceSelectWideLateChunkingPipeline(
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            min_words=120,
+            max_words=420,
+            breakpoint_threshold=0.45,
+            overlap_sentences=2,
+            retrieve_k=30,
+            top_k=top_k,
+            prompt_mode="extractive",
+            context_order="u_tail",
+            tail_reminder=True,
+            max_input_tokens=4096,
+            graph_tree_mode="local_tree",
+            graph_cluster_backend="leiden",
+            graph_fallback_backend="agglomerative",
+            graph_max_levels=2,
+            graph_branch_k=3,
+            graph_parent_top_k=6,
+            graph_child_candidate_k=24,
+            graph_similarity_threshold=0.70,
+            graph_include_parent_context=True,
+            graph_summary_mode="extractive_first",
+            sentence_max_sentences=8,
+            sentence_window=1,
+            sentence_min_query_coverage=0.25,
+            sentence_min_best_score=0.20,
+            sentence_abstain_on_low_support=True,
+            sentence_high_recall=high_recall_compress,
+            sentence_high_recall_max_sentences=12,
+            sentence_high_recall_complex_max_sentences=16,
+            sentence_max_per_context=3,
+            **GRAPH_RAPTOR_SENTENCE_SELECT_WIDE_LATE_CHUNKING_CONFIGS[variant],
+        )
     if variant == "dense_reranker":
         return DenseRerankerPipeline(
             retriever_model=retriever_model,
@@ -273,5 +468,103 @@ def build_experiment_pipeline(
             max_words=chunk_size,
             retrieve_k=retrieve_k,
             top_k=top_k,
+        )
+    if variant == "contextual_sem_rerank_minilm_flan_base":
+        return ContextualSemanticRerankerPipeline(
+            retriever_model="sentence-transformers/all-MiniLM-L6-v2",
+            generator_model="google/flan-t5-base",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
+    if variant == "sem_rerank_minilm_qwen15_direct":
+        return SemanticRerankerQwenDirectPipeline(
+            retriever_model="sentence-transformers/all-MiniLM-L6-v2",
+            generator_model="Qwen/Qwen2.5-1.5B-Instruct",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
+    if variant == "sem_rerank_minilm_qwen05_direct":
+        return SemanticRerankerQwenDirectPipeline(
+            retriever_model="sentence-transformers/all-MiniLM-L6-v2",
+            generator_model="Qwen/Qwen2.5-0.5B-Instruct",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
+    if variant == "oracle_gold_context_flan_base":
+        return OracleGoldContextPipeline(generator_model="google/flan-t5-base")
+    if variant in ORACLE_GENERATOR_BOOST_CONFIGS:
+        return OracleGoldContextPromptAblationPipeline(
+            generator_model="google/flan-t5-base",
+            **ORACLE_GENERATOR_BOOST_CONFIGS[variant],
+        )
+    if variant == "self_route_minilm_abstain":
+        return SelfRouteSemanticRerankerPipeline(
+            retriever_model="sentence-transformers/all-MiniLM-L6-v2",
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+        )
+    if variant == "self_route_e5_abstain":
+        return SelfRouteSemanticRerankerPipeline(
+            retriever_model="intfloat/e5-base-v2",
+            generator_model=generator_model,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=retrieve_k,
+            top_k=top_k,
+            query_prefix="query: ",
+            passage_prefix="passage: ",
+        )
+    if variant == "e5_qwen_filter_flan_base":
+        return E5QwenFilterGeneratorPipeline(
+            generator_model="google/flan-t5-base",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=30,
+            filter_top_k=max(top_k, 8),
+        )
+    if variant == "e5_qwen_filter_flan_large":
+        return E5QwenFilterGeneratorPipeline(
+            generator_model="google/flan-t5-large",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=30,
+            filter_top_k=max(top_k, 8),
+        )
+    if variant == "e5_qwen_compress_only_flan_large":
+        return E5QwenFilterGeneratorPipeline(
+            generator_model="google/flan-t5-large",
+            filter_mode="compress_only",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=30,
+            filter_top_k=max(top_k, 8),
+        )
+    if variant == "e5_qwen_soft_route_flan_large":
+        return E5QwenFilterGeneratorPipeline(
+            generator_model="google/flan-t5-large",
+            filter_mode="soft_route",
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=30,
+            filter_top_k=max(top_k, 8),
+        )
+    if variant == "e5_qwen_answer_only":
+        return E5QwenFilterGeneratorPipeline(
+            generator_model="google/flan-t5-large",
+            filter_mode="answer_only",
+            answer_with_qwen=True,
+            reranker_model=reranker_model,
+            max_words=chunk_size,
+            retrieve_k=30,
+            filter_top_k=max(top_k, 8),
         )
     raise ValueError(f"Unknown variant: {variant}")

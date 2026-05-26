@@ -18,6 +18,23 @@ VARIANTS = [
     "hybrid_rrf",
     "semantic_chunking_dense",
     "semantic_chunking_reranker",
+    "sem_rerank_minilm_wide_latechunk",
+    "sem_rerank_minilm_wide_latechunk_sentence_select",
+    "sem_rerank_minilm_wide_latechunk_high_recall_compress",
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor",
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor_sentence_select",
+    "sem_rerank_minilm_wide_latechunk_graphrag_raptor_high_recall_compress",
+    "sem_rerank_e5_wide_latechunk",
+    "sem_rerank_e5_wide_latechunk_sentence_select",
+    "sem_rerank_e5_wide_latechunk_high_recall_compress",
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor",
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor_sentence_select",
+    "sem_rerank_e5_wide_latechunk_graphrag_raptor_high_recall_compress",
+    "contextual_sem_rerank_minilm_flan_base",
+    "sem_rerank_minilm_qwen15_direct",
+    "sem_rerank_minilm_qwen05_direct",
+    "oracle_gold_context_flan_base",
+    "oracle_gold_context_flan_base_generator_boost",
     "semantic_chunking_hybrid_reranker",
     "dense_reranker",
     "raptor_extractive",
@@ -25,6 +42,13 @@ VARIANTS = [
     "raptor_leiden_abstractive",
     "raptor_agglomerative_abstractive",
     "semantic_raptor_leiden_reranker",
+    "self_route_minilm_abstain",
+    "self_route_e5_abstain",
+    "e5_qwen_filter_flan_base",
+    "e5_qwen_filter_flan_large",
+    "e5_qwen_compress_only_flan_large",
+    "e5_qwen_soft_route_flan_large",
+    "e5_qwen_answer_only",
 ]
 
 
@@ -66,6 +90,21 @@ def main() -> None:
     dataset = load_qasper(args.split)
     selected_dataset = long_context_records(dataset, min_doc_words=args.min_doc_words)
 
+    effective_generator_model = (
+        "google/flan-t5-large"
+        if args.variant
+        in {
+            "e5_qwen_filter_flan_large",
+            "e5_qwen_compress_only_flan_large",
+            "e5_qwen_soft_route_flan_large",
+            "e5_qwen_answer_only",
+        }
+        else "Qwen/Qwen2.5-1.5B-Instruct"
+        if args.variant == "sem_rerank_minilm_qwen15_direct"
+        else "Qwen/Qwen2.5-0.5B-Instruct"
+        if args.variant == "sem_rerank_minilm_qwen05_direct"
+        else args.generator_model
+    )
     output_stem = f"{args.variant}_{args.split}_min{args.min_doc_words}"
     config = BaseRAGConfig(
         split=args.split,
@@ -74,7 +113,7 @@ def main() -> None:
         chunk_size=args.chunk_size,
         overlap=args.overlap,
         retriever_model=args.retriever_model,
-        generator_model=args.generator_model,
+        generator_model=effective_generator_model,
         output_predictions=f"{args.output_dir}/{output_stem}_predictions.jsonl",
         output_summary=f"{args.output_dir}/{output_stem}_summary.json",
     )

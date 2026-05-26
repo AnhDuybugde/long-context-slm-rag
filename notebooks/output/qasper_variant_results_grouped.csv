@@ -1,0 +1,54 @@
+Group,Variant,Original Method,Token F1,Answer Recall@5,Context Recall,Context Precision,Faithfulness,Relevancy,Runtime,Sec/example,Kaggle Link
+RAPTOR,raptor_leiden_abstractive,RAPTOR with Leiden Abstractive Summarization,0.1522,0.1787,0.3521,0.4868,0.4648,0.0864,1655.36s,2.839s,
+RAPTOR,raptor_extractive,RAPTOR Extractive,0.1425,0.1838,0.3719,0.5743,0.4803,0.0755,3043.50s,5.220s,
+RAPTOR,raptor_gmm_abstractive,RAPTOR GMM Abstractive,0.1477,0.1878,0.3655,0.5129,0.6484,0.0617,1447.62s,2.483s,
+RAPTOR,raptor_agglomerative_abstractive,RAPTOR Agglomerative Abstractive,0.1782,0.1698,0.3221,0.4501,0.6552,0.0782,2360.66s,4.049s,
+RAPTOR,semantic_raptor_leiden_reranker,Semantic RAPTOR Leiden + Cross-Encoder Reranker,0.2254,0.1812,0.376,0.5616,0.5557,0.1258,3427.14s,5.878s,
+Baseline / Simple Retrieval,base_dense,Base Dense Retrieval,0.1165,0.2018,0.4147,0.6021,0.5472,0.0411,179.79s,0.308s,
+Baseline / Simple Retrieval,semantic_chunking_dense,Dense Retrieval + Semantic Chunking,0.2256,0.1561,0.3279,0.53,0.3722,0.1356,221.20s,0.379s,
+Baseline / Simple Retrieval,dense_reranker,Dense Retrieval + Cross-Encoder Reranker,0.119,0.2207,0.4603,0.6518,0.5506,0.0456,210.81s,0.362s,
+Baseline / Simple Retrieval,dense_recency_heavy,Dense Retrieval + Recency-Heavy Reordering,0.1047,0.2018,0.4147,0.6021,0.5146,0.0426,169.66s,0.291s,
+Baseline / Simple Retrieval,dense_u_shape,Dense Retrieval + U-Shape Reordering,0.1043,0.2018,0.4147,0.6021,0.5232,0.0407,177.60s,0.305s,
+Baseline / Simple Retrieval,bm25_only,BM25 Retrieval Only,0.0891,0.1795,0.3504,0.6153,0.5437,0.0293,145.84s,0.250s,
+Baseline / Simple Retrieval,hybrid_rrf,Hybrid Retrieval with Reciprocal Rank Fusion (dense retrieval + bm25 + rank),0.1021,0.2053,0.428,0.6343,0.5643,0.0397,186.96s,0.321s,
+Semantic Reranker,semantic_chunking_reranker,Semantic Chunking + Dense Retrieval + Cross-Encoder Reranker,0.2338,0.1967,0.416,0.6,0.5197,0.1286,301.73s,0.518s,
+Semantic Reranker,semantic_chunking_hybrid_reranker,Semantic Chunking + Hybrid RRF Retrieval(dense+bm25) + Cross-Encoder Reranker,0.2251,0.2001,0.4114,0.6065,0.5009,0.1242,311.75s,0.535s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_baseline,Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker,0.2551,0.1967,0.416,0.6,0.3551,0.1637,245.76s,0.422s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_baseline_tk8,"Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker (retrieve_k=30, top_k=8)",0.1171,0.2387,0.4974,0.5761,0.5232,0.0565,260.13s,0.446s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_baseline_rk30,Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker (retrieve_k=30),0.2456,0.201,0.4186,0.6089,0.3362,0.1619,256.56s,0.440s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_extractive_prompt,MiniLM Semantic Reranker + Extractive Prompt,0.2549,0.1967,0.416,0.6,0.3791,0.16,231.94s,0.398s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_extractive_prompt_rk30,MiniLM Semantic Reranker + Extractive Prompt (retrieve_k=30),0.2427,0.201,0.4186,0.6089,0.3602,0.1569,245.22s,0.421s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_strict_prompt,MiniLM Semantic Reranker + Strict Grounded Prompt,0.2481,0.1967,0.416,0.6,0.3465,0.1636,252.73s,0.433s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_strict_prompt_rk30,MiniLM Semantic Reranker + Strict Grounded Prompt (retrieve_k=30),0.2398,0.201,0.4186,0.6089,0.3345,0.1633,261.00s,0.448s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_citation_prompt,MiniLM Semantic Reranker + Citation Prompt,0.1777,0.1967,0.416,0.6,0.1852,0.1189,210.35s,0.361s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_citation_prompt_tk8,"MiniLM Semantic Reranker + Citation Prompt (retrieve_k=30, top_k=8)",0.042,0.2387,0.4974,0.5761,0.0549,0.0311,220.92s,0.379s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_neighbor1,MiniLM Semantic Reranker + Neighbor Context Expansion,0.1129,0.1881,0.4065,0.533,0.5111,0.0543,276.12s,0.474s,
+MiniLM Prompt / Context Ablation,sem_rerank_minilm_neighbor1_rk30,MiniLM Semantic Reranker + Neighbor Context Expansion (retrieve_k=30),0.1155,0.1933,0.3985,0.5334,0.5043,0.0578,292.35s,0.501s,
+Embedding Model Swap,sem_rerank_bge_base,Semantic Chunking + BGE-base Dense + Cross-Encoder Reranker,0.2369,0.2095,0.4358,0.6065,0.3345,0.1525,492.82s,0.845s,
+Embedding Model Swap,sem_rerank_bge_base_rk30,Semantic Chunking + BGE-base Dense + Cross-Encoder Reranker (retrieve_k=30),0.2263,0.2053,0.4401,0.6072,0.3431,0.1525,519.80s,0.892s,
+Embedding Model Swap,sem_rerank_gte_base,Semantic Chunking + GTE-base Dense + Cross-Encoder Reranker,0.1136,0.225,0.4623,0.6467,0.53,0.0526,304.19s,0.522s,
+Embedding Model Swap,sem_rerank_gte_base_rk30,Semantic Chunking + GTE-base Dense + Cross-Encoder Reranker (retrieve_k=30),0.1004,0.2216,0.4636,0.6508,0.5334,0.0463,311.40s,0.534s,
+Embedding Model Swap,sem_rerank_e5_base,Semantic Chunking + E5-base Dense + Cross-Encoder Reranker,0.1052,0.2216,0.4546,0.6545,0.5386,0.0465,440.52s,0.756s,
+Embedding Model Swap,sem_rerank_e5_base_tk8,"Semantic Chunking + E5-base Dense + Cross-Encoder Reranker (retrieve_k=30, top_k=8)",0.0741,0.2576,0.5454,0.6299,0.5746,0.0261,458.87s,0.787s,
+Embedding Model Swap,sem_rerank_e5_base_strict,E5-base Semantic Reranker + Strict Grounded Prompt,0.1168,0.2216,0.4546,0.6545,0.4837,0.0554,464.56s,0.797s,
+Embedding Model Swap,sem_rerank_e5_base_strict_rk30,E5-base Semantic Reranker + Strict Grounded Prompt (retrieve_k=30),0.1308,0.2233,0.4566,0.6552,0.4768,0.0581,506.29s,0.868s,
+Embedding Model Swap,sem_rerank_e5_base_rk30,Semantic Chunking + E5-base Dense + Cross-Encoder Reranker (retrieve_k=30),0.1038,0.2233,0.4566,0.6552,0.5249,0.0488,460.55s,0.790s,
+Embedding Model Swap,sem_rerank_e5_neighbor1_strict,E5-base Semantic Reranker + Neighbor Context + Strict Prompt,0.0809,0.2318,0.4501,0.576,0.5317,0.0247,477.11s,0.818s,
+Embedding Model Swap,sem_rerank_e5_neighbor1_strict_tk8,"E5-base Semantic Reranker + Neighbor Context + Strict Prompt (retrieve_k=40, top_k=8)",0.081,0.2456,0.492,0.566,0.53,0.0249,490.00s,0.840s,
+Qwen Filter / Generator,e5_qwen_filter_flan_base,E5 Retrieval + Cross-Encoder Reranker + Qwen2.5-1.5B Evidence Filter/Compressor + Flan-T5-Base Generator,0.1162,0.2576,0.5426,0.6304,0.9983,0.0001,1911.69s,3.279s,https://www.kaggle.com/code/duyem54/qasper-e5-qwen-filter-flan-base-standalone
+Qwen Filter / Generator,e5_qwen_filter_flan_large,E5 Retrieval + Cross-Encoder Reranker + Qwen2.5-1.5B Evidence Filter/Compressor + Flan-T5-Large Generator,0.1172,0.2576,0.5426,0.6304,0.9966,0.001,1941.64s,3.330s,https://www.kaggle.com/code/anhduy54/qasper-e5-qwen-filter-flan-large-standalone
+Qwen Filter / Generator,e5_qwen_soft_route_flan_large,E5 Retrieval + Cross-Encoder Reranker + Qwen2.5-1.5B Soft Routing/Compression + Flan-T5-Large Generator,0.1443,0.189,0.3832,0.6835,0.6655,0.0559,5559.85s,9.537s,https://www.kaggle.com/code/duyem54/qasper-e5-qwen-compress-only-flan-large-standalone
+Qwen Filter / Generator,e5_qwen_compress_only_flan_large,E5 Retrieval + Cross-Encoder Reranker + Qwen2.5-1.5B Compress-Only Evidence Pack + Flan-T5-Large Generator,0.1501,0.1744,0.3483,0.6927,0.6141,0.063,5477.43s,9.395s,https://www.kaggle.com/code/duyem54/qasper-e5-qwen-soft-route-flan-large-standalone
+Qwen Filter / Generator,sem_rerank_minilm_qwen05_direct,Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker + Qwen2.5-0.5B Direct Generator,0.2157,0.1967,0.416,0.6,0.2744,0.2497,660.41s,1.133s,https://www.kaggle.com/code/duyem54/qasper-sem-rerank-minilm-qwen15-direct-standalone
+Qwen Filter / Generator,sem_rerank_minilm_qwen15_direct,Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker + Qwen2.5-1.5B Direct Generator,0.2389,0.1967,0.416,0.6,0.3825,0.2552,879.15s,1.508s,https://www.kaggle.com/code/kurt54/qasper-sem-rerank-minilm-qwen05-direct-standalone
+Contextual Retrieval,contextual_sem_rerank_minilm_flan_base,Contextual Semantic Chunking + MiniLM Dense + Cross-Encoder Reranker + Flan-T5-base,0.2356,0.1907,0.42,0.6017,0.5266,0.1246,326.43s,0.560s,https://www.kaggle.com/code/duyem54/qasper-oracle-gold-context-flan-base-standalone
+Oracle,oracle_gold_context_flan_base,Oracle Gold Context + Flan-T5-base Generator,0.3067,0.321,0.946,0.9468,0.5026,0.1616,184.86s,0.317s,https://www.kaggle.com/code/kurt54/qasper-contextual-sem-rerank-minilm-flan-base-stan
+Oracle,qasper_oracle_gold_context_flan_base_generator_boost_standalone,Oracle Gold Context + Flan-T5-base Generator Boost,0.269,0.321,0.947,0.946,0.65,0.127,,0.228,https://www.kaggle.com/code/duyem54/qasper-oracle-gold-context-flan-base-generator-boo
+Wide Late Chunking,qasper_sem_rerank_minilm_wide_latechunk_standalone,MiniLM Wide Semantic Late Chunking + Cross-Encoder Reranker,0.237,0.21,0.676,0.447,0.292,0.169,388.8,0.666,https://www.kaggle.com/code/duyem54/qasper-sem-rerank-minilm-wide-latechunk-standalone
+Wide Late Chunking,qasper_sem_rerank_e5_wide_latechunk_standalone,E5 Wide Semantic Late Chunking + Cross-Encoder Reranker,0.244,0.245,0.579,0.387,0.208,0.176,735.6,1.261,https://www.kaggle.com/code/duyem54/qasper-sem-rerank-e5-wide-latechunk-standalone
+GraphRAG / RAPTOR Wide Late,sem_rerank_minilm_wide_latechunk_graphrag_raptor,MiniLM Wide Late Chunking + GraphRAG/RAPTOR Tree Routing,0.228,0.238,0.585,0.385,0.202,0.168,813.7,1.395,https://www.kaggle.com/code/duyem54/sem-rerank-minilm-wide-latechunk-graphrag-raptor
+GraphRAG / RAPTOR Wide Late,sem_rerank_e5_wide_latechunk_graphrag_raptor,E5 Wide Late Chunking + GraphRAG/RAPTOR Tree Routing,0.232,0.193,0.672,0.412,0.293,0.159,395.92,0.679,https://www.kaggle.com/code/duyem54/sem-rerank-e5-wide-latechunk-graphrag-raptor
+High Recall Compression,sem_rerank_minilm_wide_latechunk_high_recall_compr,MiniLM Wide Late Chunking + High-Recall Sentence Compression,0.223,0.196,0.183,0.249,0.593,0.151,513,0.88,https://www.kaggle.com/code/duyem54/sem-rerank-minilm-wide-latechunk-high-recall-compr
+High Recall Compression,sem_rerank_e5_wide_latechunk_high_recall_compress,E5 Wide Late Chunking + High-Recall Sentence Compression,0.215,0.197,0.157,0.252,0.567,0.146,904,1.55,https://www.kaggle.com/code/duyem54/sem-rerank-e5-wide-latechunk-high-recall-compress
+High Recall Compression,sem_rerank_minilm_wide_latechunk_graphrag_raptor_high_recall_compress,MiniLM Wide Late Chunking + GraphRAG/RAPTOR + High-Recall Sentence Compression,0.206,0.178,0.182,0.219,0.552,0.135,467,0.801,https://www.kaggle.com/code/kurt54/sem-rerank-minilm-wide-latechunk-graphrag-raptor-h
+High Recall Compression,sem_rerank_e5_wide_latechunk_graphrag_raptor_high_recall_compress,E5 Wide Late Chunking + GraphRAG/RAPTOR + High-Recall Sentence Compression,0.211,0.193,0.159,0.25,0.567,0.148,776,1.33,https://www.kaggle.com/code/kurt54/sem-rerank-e5-wide-latechunk-graphrag-raptor-high

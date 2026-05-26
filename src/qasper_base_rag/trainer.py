@@ -73,6 +73,11 @@ class MetricsAccumulator:
         self.context_recall = 0.0
         self.faithfulness = 0.0
         self.answer_relevancy = 0.0
+        self.generated = 0
+        self.abstained = 0
+        self.answered_token_f1 = 0.0
+        self.abstained_has_gold_context = 0
+        self.generated_without_gold_context = 0
 
     def add(self, result: EvaluationResult) -> None:
         self.count += 1
@@ -82,6 +87,18 @@ class MetricsAccumulator:
         self.context_recall += result.context_recall
         self.faithfulness += result.faithfulness
         self.answer_relevancy += result.answer_relevancy
+        route = result.metadata.get("route")
+        generated = route == "generate" or (route is None and result.prediction.strip().lower() != "unanswerable")
+        has_gold_context = result.answer_string_recall_at_k > 0.0 or result.context_recall > 0.0
+        if generated:
+            self.generated += 1
+            self.answered_token_f1 += result.token_f1
+            if not has_gold_context:
+                self.generated_without_gold_context += 1
+        else:
+            self.abstained += 1
+            if has_gold_context:
+                self.abstained_has_gold_context += 1
 
     def add_index_time(self, seconds: float) -> None:
         self.docs += 1
@@ -105,6 +122,13 @@ class MetricsAccumulator:
                 "avg_context_recall": 0.0,
                 "avg_faithfulness": 0.0,
                 "avg_answer_relevancy": 0.0,
+                "coverage": 0.0,
+                "abstain_rate": 0.0,
+                "answered_examples": 0,
+                "abstained_examples": 0,
+                "answered_token_f1": 0.0,
+                "abstained_has_gold_context_rate": 0.0,
+                "generated_without_gold_context_rate": 0.0,
             }
         return {
             "examples": self.count,
@@ -119,6 +143,17 @@ class MetricsAccumulator:
             "avg_context_recall": self.context_recall / self.count,
             "avg_faithfulness": self.faithfulness / self.count,
             "avg_answer_relevancy": self.answer_relevancy / self.count,
+            "coverage": self.generated / self.count,
+            "abstain_rate": self.abstained / self.count,
+            "answered_examples": self.generated,
+            "abstained_examples": self.abstained,
+            "answered_token_f1": self.answered_token_f1 / self.generated if self.generated else 0.0,
+            "abstained_has_gold_context_rate": (
+                self.abstained_has_gold_context / self.abstained if self.abstained else 0.0
+            ),
+            "generated_without_gold_context_rate": (
+                self.generated_without_gold_context / self.generated if self.generated else 0.0
+            ),
         }
 
 
@@ -166,7 +201,10 @@ class BaseRAGTrainer:
         return self._write_summary(metrics, summary_path, predictions_path)
 
     def evaluate_example(self, example: QAExample) -> EvaluationResult:
-        answer_result = self.pipeline.answer(example.question)
+        if hasattr(self.pipeline, "answer_example"):
+            answer_result = self.pipeline.answer_example(example)
+        else:
+            answer_result = self.pipeline.answer(example.question)
         contexts = answer_result["contexts"]
         scores = answer_result["scores"]
         prediction = answer_result["answer"]
